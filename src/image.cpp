@@ -58,7 +58,7 @@ bool load_image( Image_t *image ) {
 	return true;
 }
 
-void *get_raw_image_at_offset( Image_t *image, unsigned int offset, size_t size ) {
+void *get_raw_image_at_offset( Image_t *image, uint32_t offset, size_t size ) {
   
   if( offset + size > image->raw_size )
     return NULL;

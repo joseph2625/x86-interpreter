@@ -7,7 +7,7 @@
 int main( int argc, char *argv[] ) {
 
   Image_t image = { 0 };
-  unsigned int verbosity_level = 2;
+  uint32_t verbosity_level = 2;
 
   for( int i = 1; i < argc; i++ ) {
 
@@ -36,17 +36,24 @@ int main( int argc, char *argv[] ) {
   }
 
   RuntimeEnvironment_t environment;
-  ThreadNode_t *main_thread;
+  pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+  sem_t notifier_sem;
+  sem_t wait_sem;
+  sem_init( &notifier_sem, NULL, 0 );
+  sem_init( &wait_sem, NULL, 0 );
 
-  main_thread = set_up_runtime_environment( &image, &environment );
-  if( main_thread == NULL ) {
+  if( !set_up_runtime_environment( &image, &environment, mutex, notifier_sem, wait_sem ) ) {
     fprintf( stderr, "ERROR: Unable to set up the runtime environment\n" );
     return 1;
   }
 
-
-
-
+  while( true ){
+    sem_wait( &notifier_sem );
+    sem_post( &wait_sem );
+    if( !update_runtime_environment( &environment ))
+      break;
+  }
+  fprintf( stderr, "All threads terminated. Exiting...\n" );
   return 0;
 err_no_level:
   fprintf( stderr, "ERROR: Missing/Invalid verbosity level\n" );

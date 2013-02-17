@@ -2,6 +2,7 @@
 #define X86INTERPRETER_IMAGE_H
 
 #include <stdio.h>
+#include <stdint.h>
 
 #define READ_BUFFER_SIZE 64*1024
 
@@ -23,9 +24,9 @@ typedef enum ArchitectureType{
 typedef struct ImageSection {
   unsigned name[8]; //this is NOT null-terminated string
   size_t raw_size;
-  unsigned int relative_virtual_base_address;
-  unsigned int virtual_size;
-  unsigned int characteristics;
+  uint32_t relative_virtual_base_address;
+  uint32_t virtual_size;
+  uint32_t characteristics;
 
   unsigned char *buffer;
 } ImageSection_t;
@@ -33,14 +34,14 @@ typedef struct ImageSection {
 typedef struct Image {
 	char *name;
 	unsigned char *buffer; //should be freed after use
-	unsigned int relative_virtual_entry_point;
+	uint32_t relative_virtual_entry_point;
   unsigned int image_base;
   size_t raw_size;
-  unsigned int stack_size;
+  uint32_t stack_size;
 
   ArchitectureType_t architecture_type;
   ExecutableType_t executable_type;
-  unsigned int number_of_sections;
+  uint32_t number_of_sections;
 
   ImageSection_t *sections; //should be freed after use
 
@@ -49,5 +50,5 @@ typedef struct Image {
 bool open_and_read_image_from_disk( char *file_name, void **destination_buffer );
 bool load_image( Image_t *image );
 bool process_image( Image_t *image );
-void *get_raw_image_at_offset( Image_t *image, unsigned int offset, size_t size );
+void *get_raw_image_at_offset( Image_t *image, uint32_t offset, size_t size );
 #endif //X86INTERPRETER_IMAGE_H

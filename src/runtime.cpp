@@ -3,9 +3,10 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "pthread.h"
+#include "interpreter.h"
 
 void update_virtual_memory_lookup_table_on_create( RuntimeEnvironment_t *environment, VirtualPageNode_t *newly_created_page ) {
-  unsigned int address = newly_created_page->begin;
+  uint32_t address = newly_created_page->begin;
   unsigned char *buffer = newly_created_page->buffer;
 
   do{
@@ -26,7 +27,7 @@ void update_virtual_memory_lookup_table_on_create( RuntimeEnvironment_t *environ
 
 }
 
-unsigned int insert_new_page_in_between( VirtualPageNode_t * prev, unsigned int requested_base, unsigned int requested_size, unsigned char * initial_data, unsigned int initial_data_size, VirtualPageNode_t * next, RuntimeEnvironment_t * environment ) 
+uint32_t insert_new_page_in_between( VirtualPageNode_t * prev, uint32_t requested_base, uint32_t requested_size, unsigned char * initial_data, uint32_t initial_data_size, VirtualPageNode_t * next, RuntimeEnvironment_t * environment ) 
 {
   prev->next = (VirtualPageNode_t *)malloc( sizeof( VirtualPageNode_t ) );
 
@@ -49,7 +50,7 @@ unsigned int insert_new_page_in_between( VirtualPageNode_t * prev, unsigned int 
   return prev->next->begin;
 }
 
-unsigned int create_virtual_memory_page( RuntimeEnvironment_t *environment, unsigned int requested_size = UNSPECIFIED_SIZE, unsigned int requested_base = UNSPECIFIED_BASE, unsigned char *initial_data = NULL, unsigned int initial_data_size = UNSPECIFIED_SIZE  ){
+uint32_t create_virtual_memory_page( RuntimeEnvironment_t *environment, uint32_t requested_size = UNSPECIFIED_SIZE, uint32_t requested_base = UNSPECIFIED_BASE, unsigned char *initial_data = NULL, uint32_t initial_data_size = UNSPECIFIED_SIZE  ){
 
   VirtualPageNode_t *next = environment->page_list->next;
   VirtualPageNode_t *prev = environment->page_list;
@@ -150,24 +151,27 @@ bool load_sections_to_virtual_memory( Image_t *image, RuntimeEnvironment_t *envi
 void *runtime_thread( void *context ) {
   PthreadContext_t *pthread_context = (PthreadContext_t *)context;
 
+#ifndef _WIN32
+  sigset_t set;
+  sigfillset(&set);
+  pthread_sigmask( SIG_BLOCK, &set, NULL);
+#endif
 
+  pthread_context->thread_node->exit_code = interpret( pthread_context->runtime_environment, pthread_context->thread_node );
+
+  pthread_context->thread_node->state = EXITED;
+
+  pthread_mutex_lock( &pthread_context->mutex );
+
+  sem_post( &pthread_context->notifier_sem );
+  sem_wait( &pthread_context->wait_sem );
+  pthread_mutex_unlock( &pthread_context->mutex );
 
   free( context );
   return NULL;
 }
 
-void resume_thread( RuntimeEnvironment_t *environment, ThreadNode_t *thread, pthread_mutex_t mutex, sem_t notifier_sem, sem_t wait_sem  ){
-  
-  PthreadContext_t *context = (PthreadContext_t *)malloc( sizeof(PthreadContext_t) );
-  context->thread_node = thread;
-  context->runtime_environment = environment;
-  context->mutex = mutex;
-  context->notifier_sem = notifier_sem;
-  context->wait_sem = wait_sem;
-
-  pthread_create(&thread->pthread, NULL, runtime_thread, context);
-}
-ThreadNode_t * create_thread( RuntimeEnvironment_t *environment, unsigned int entry_point, unsigned int stack_size )
+bool create_thread( RuntimeEnvironment_t *environment, uint32_t entry_point, uint32_t stack_size, pthread_mutex_t mutex, sem_t notifier_sem, sem_t wait_sem  )
 {
 
   ThreadNode_t *temp_node = environment->threads;
@@ -175,23 +179,38 @@ ThreadNode_t * create_thread( RuntimeEnvironment_t *environment, unsigned int en
   environment->thread_count++;
   environment->threads = (ThreadNode_t *)calloc( 1, sizeof(ThreadNode_t) );
   environment->threads->next = temp_node;
-  environment->threads->state = SUSPENDED;
+  environment->threads->state = RUNNING;
 
   environment->threads->context.eip = 4096*16;
   environment->threads->context.eax = entry_point;
   environment->threads->context.esp = create_virtual_memory_page( environment, stack_size );
+  environment->threads->context.code = get_real_address( environment->threads->context.eip, &environment->directory_table, EXECUTE );
   
   if( environment->threads->context.esp == NULL ) {
     free(environment->threads);
     environment->threads = temp_node;
-    return NULL;
+    return false;
   }
 
+
   environment->threads->context.esp += stack_size - 8;
-  return environment->threads;
+  environment->threads->context.stack = get_real_address( environment->threads->context.esp, &environment->directory_table, READ | WRITE );
+
+
+
+  PthreadContext_t *context = (PthreadContext_t *)malloc( sizeof(PthreadContext_t) );
+  context->thread_node = environment->threads;
+  context->runtime_environment = environment;
+  context->mutex = mutex;
+  context->notifier_sem = notifier_sem;
+  context->wait_sem = wait_sem;
+
+  pthread_create(&environment->threads->pthread, NULL, runtime_thread, context);
+
+  return true;
 }
 
-bool insert_thread_entry_point( RuntimeEnvironment_t *environment, unsigned int initial_stack_size )
+bool insert_thread_entry_point( RuntimeEnvironment_t *environment, uint32_t initial_stack_size )
 {
   unsigned char wrapper_opcodes[] = { 0xFF, 0xD0, 0x8B, 0xD8, 0xB8, 0x01, 0x00, 0x00, 0x00, 0xCD, 0x80 };//call eax; mov ebx, eax; mov eax, 1; int 80h
   if( create_virtual_memory_page(environment, 4096, 4096*16, wrapper_opcodes, sizeof(wrapper_opcodes)) == NULL )
@@ -199,15 +218,40 @@ bool insert_thread_entry_point( RuntimeEnvironment_t *environment, unsigned int 
 
   return true;
 }
-ThreadNode_t * set_up_runtime_environment( Image_t *image, RuntimeEnvironment_t *environment )
+bool set_up_runtime_environment( Image_t *image, RuntimeEnvironment_t *environment, pthread_mutex_t mutex, sem_t notifier_sem, sem_t wait_sem )
 {
   memset( environment, 0, sizeof(RuntimeEnvironment_t) );
   
   if( !load_sections_to_virtual_memory( image, environment ) )
-    return NULL;
+    return false;
 
   if( !insert_thread_entry_point( environment, image->stack_size ) )
-    return NULL;
+    return false;
 
-  return create_thread( environment, image->image_base + image->relative_virtual_entry_point, image->stack_size );
+  return create_thread( environment, image->image_base + image->relative_virtual_entry_point, image->stack_size, mutex, notifier_sem, wait_sem );
+}
+bool update_runtime_environment( RuntimeEnvironment_t *environment ){
+  if( environment->threads == NULL )
+    assert( 0 );
+
+  ThreadNode_t *thread = environment->threads;
+  ThreadNode_t **prev = &environment->threads;
+  ThreadNode_t *to_delete;
+
+  while( thread != NULL ){
+    if( thread->state == EXITED ) {
+      (*prev) = thread->next;
+      to_delete = thread;
+      thread = thread->next;
+      free( to_delete );
+    } else {
+      prev = &thread->next;
+      thread = thread->next;
+    }
+  }
+
+  if( environment->threads == NULL )
+    return false;
+
+  return true;
 }

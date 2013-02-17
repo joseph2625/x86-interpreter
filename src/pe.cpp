@@ -264,7 +264,7 @@ bool process_pe( Image_t *image )
   if(image->sections == NULL)
     return false;
 
-  for( unsigned int i = 0; i < image->number_of_sections; i++, section_header++ ){
+  for( uint32_t i = 0; i < image->number_of_sections; i++, section_header++ ){
     image->sections[i].buffer = (unsigned char *)get_raw_image_at_offset( image, section_header->PointerToRawData, section_header->SizeOfRawData );
     if( image->sections[i].buffer == NULL ) {
       free( image->sections );
