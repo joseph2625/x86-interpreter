@@ -305,10 +305,22 @@ HANDLER_DEF_END
 
 HANDLER_DEF_BEGIN(undefined_opcode_handler) {
   fprintf( stderr, "ERROR: Undefined opcode\n");
+#ifndef _WIN32
+  return -1;
 }
-__asm mov eax, 0xFFFFFFFF;
-__asm ret;
-HANDLER_DEF_END
+#else
+}
+__asm {
+mov eax, 0xFFFFFFFF
+mov esp, ebp
+pop edi
+pop esi
+pop ebx
+pop ebp
+ret
+}
+}
+#endif
 
 HANDLER_DEF_BEGIN(add_al_imm8_handler) {
     register uint32_t i =context->eax & 0xFF;//AL
@@ -387,9 +399,9 @@ inline unsigned char * get_real_address( uint32_t virtual_address, VirtualDirect
   if( directory_lookup_table->tlb_key == ( virtual_address >> 12 ) )
     return directory_lookup_table->tlb_value + ( virtual_address & 4095 );
   else {
-    register VirtualPageLookupTable_t *page_lookup_table;
+    VirtualPageLookupTable_t *page_lookup_table;
     if( page_lookup_table = directory_lookup_table->page_lookup_table[virtual_address >> 22] ) {
-      register unsigned char *frame;
+      unsigned char *frame;
       if( frame = page_lookup_table->frames[(virtual_address >> 12) & 1023]) {
         directory_lookup_table->tlb_key = ( virtual_address >> 12 );
         directory_lookup_table->tlb_value = frame;
