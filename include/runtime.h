@@ -23,6 +23,15 @@ typedef struct VirtualDirectoryLookupTable {
   unsigned char *tlb_value;
 } VirtualDirectoryLookupTable_t;
 
+#define REGISTER_INDEX_EAX 0
+#define REGISTER_INDEX_ECX 1
+#define REGISTER_INDEX_EDX 2
+#define REGISTER_INDEX_EBX 3
+#define REGISTER_INDEX_ESP 4
+#define REGISTER_INDEX_EBP 5
+#define REGISTER_INDEX_ESI 6
+#define REGISTER_INDEX_EDI 7
+
 typedef struct ThreadContext {
   
   uint16_t gs;
@@ -33,7 +42,7 @@ typedef struct ThreadContext {
   uint16_t ss;
 
   union {
-    uint32_t registers[8];
+    uint32_t general_purpose_registers[8];
     struct {
       uint32_t eax;
       uint32_t ecx;

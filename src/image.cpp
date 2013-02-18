@@ -3,7 +3,7 @@
 #include "pe.h"
 #include <assert.h>
 
-bool open_and_read_image_from_disk( Image_t *image )
+bool open_and_read_image_from_disk( Image_t *const image )
 {
 	FILE *file = fopen( image->name, "rb" );
 
@@ -47,7 +47,7 @@ bool open_and_read_image_from_disk( Image_t *image )
 }
 
 
-bool load_image( Image_t *image ) {
+bool load_image( Image_t *const image ) {
 
   if( !open_and_read_image_from_disk( image ) )
     return false;
@@ -58,7 +58,7 @@ bool load_image( Image_t *image ) {
 	return true;
 }
 
-void *get_raw_image_at_offset( Image_t *image, uint32_t offset, size_t size ) {
+void *get_raw_image_at_offset( Image_t *const image, const uint32_t offset, const size_t size ) {
   
   if( offset + size > image->raw_size )
     return NULL;
@@ -66,7 +66,7 @@ void *get_raw_image_at_offset( Image_t *image, uint32_t offset, size_t size ) {
   return &image->buffer[offset];
 }
 
-bool process_image( Image_t *image ) {
+bool process_image( Image_t * const image ) {
 
   if( image->raw_size < 4 )
     return false;

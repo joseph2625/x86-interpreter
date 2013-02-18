@@ -3,13 +3,15 @@
 #include <assert.h>
 
 #ifndef _WIN32
-void FASTCALL dispatch( ThreadContext_t *context, VirtualDirectoryLookupTable_t *table ){
+void FASTCALL dispatch( ThreadContext_t *const context, VirtualDirectoryLookupTable_t *const table ){
 static void *opcode_dispatch_table[256] = {
 #else
 
-int FASTCALL undefined_opcode_handler( ThreadContext_t *, VirtualDirectoryLookupTable_t *);
-int FASTCALL add_al_imm8_handler( ThreadContext_t *, VirtualDirectoryLookupTable_t * );
-int FASTCALL call_rm32_handler( ThreadContext_t *, VirtualDirectoryLookupTable_t * );
+int FASTCALL undefined_opcode_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL add_al_imm8_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL add_eax_imm32_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL add_rm8_imm8_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL call_rm32_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
 
 int (FASTCALL * opcode_dispatch_table[256]) (ThreadContext_t *, VirtualDirectoryLookupTable_t *) = {
 #endif
@@ -18,7 +20,7 @@ int (FASTCALL * opcode_dispatch_table[256]) (ThreadContext_t *, VirtualDirectory
   HANDLER_DECL(undefined_opcode_handler), //0x02
   HANDLER_DECL(undefined_opcode_handler), //0x03
   HANDLER_DECL(add_al_imm8_handler), //0x04
-  HANDLER_DECL(undefined_opcode_handler), //0x05
+  HANDLER_DECL(add_eax_imm32_handler), //0x05
   HANDLER_DECL(undefined_opcode_handler), //0x06
   HANDLER_DECL(undefined_opcode_handler), //0x07
   HANDLER_DECL(undefined_opcode_handler), //0x08
@@ -141,7 +143,7 @@ int (FASTCALL * opcode_dispatch_table[256]) (ThreadContext_t *, VirtualDirectory
   HANDLER_DECL(undefined_opcode_handler), //0x7D
   HANDLER_DECL(undefined_opcode_handler), //0x7E
   HANDLER_DECL(undefined_opcode_handler), //0x7F
-  HANDLER_DECL(undefined_opcode_handler), //0x80
+  HANDLER_DECL(add_rm8_imm8_handler), //0x80
   HANDLER_DECL(undefined_opcode_handler), //0x81
   HANDLER_DECL(undefined_opcode_handler), //0x82
   HANDLER_DECL(undefined_opcode_handler), //0x83
@@ -276,8 +278,11 @@ goto *opcode_dispatch_table[Context->code[0]];
 #endif
 
 HANDLER_DEF_BEGIN(call_rm32_handler) {
-  register uint32_t i = context->code[1];
-  register uint32_t j;
+
+  assert( context->code[0] == 0xFF );
+
+  uint32_t i = context->code[1];
+  uint32_t j;
   unsigned char *dest;
   switch( GETEXTOPCODE(i) ) {
   case 2:
@@ -311,58 +316,173 @@ HANDLER_DEF_BEGIN(undefined_opcode_handler) {
 #else
 }
 __asm {
-mov eax, 0xFFFFFFFF
-mov esp, ebp
-pop edi
-pop esi
-pop ebx
-pop ebp
-ret
+  mov eax, 0xFFFFFFFF
+    mov esp, ebp
+    pop edi
+    pop esi
+    pop ebx
+    pop ebp
+    ret
 }
 }
 #endif
 
 HANDLER_DEF_BEGIN(add_al_imm8_handler) {
-    register uint32_t i =context->eax & 0xFF;//AL
-    register uint32_t j =(uint32_t)context->code[1];//imm8
-    register uint32_t k = i + j;
 
-    if( k >> 8 )
-      SETCF(context->eflags);
-    else
-      UNSETCF(context->eflags);
+  assert( context->code[0] == 0x04 );
+  register uint32_t i =context->eax & 0xFF;//AL
+  register uint32_t j =(uint32_t)context->code[1];//imm8
+  register uint32_t k = i + j;
+
+  if( k >> 8 )
+    SETCF(context->eflags);
+  else
+    UNSETCF(context->eflags);
     
-    if( (i ^ j) & 0x80 )
-      UNSETOF(context->eflags);
-    else if( (i ^ k) & 0x80 )
-      SETOF(context->eflags);
-    else
-      UNSETOF(context->eflags);
+  if( (i ^ j) & 0x80 )
+    UNSETOF(context->eflags);
+  else if( (i ^ k) & 0x80 )
+    SETOF(context->eflags);
+  else
+    UNSETOF(context->eflags);
 
-    if( (k & 0x80) > 0 )
-      SETSF(context->eflags);
-    else
-      UNSETSF(context->eflags);
+  if( (k & 0x80) > 0 )
+    SETSF(context->eflags);
+  else
+    UNSETSF(context->eflags);
 
-    if( k == 0 )
-      SETZF(context->eflags);
-    else
-      UNSETZF(context->eflags);
+  if( k == 0 )
+    SETZF(context->eflags);
+  else
+    UNSETZF(context->eflags);
 
-    UNSETAF(context->eflags);
+  UNSETAF(context->eflags);
 
-    k &= 0x80;
-    if( parity_table[k] )
-      SETPF(context->eflags);
-    else
-      UNSETPF(context->eflags);
+  if( parity_table[k & 0xFF] )
+    SETPF(context->eflags);
+  else
+    UNSETPF(context->eflags);
 
-    context->eax = ( context->eax & 0xFFFFFF00 ) | k;
-    context->code+=2;
-    context->eip+=2;
-  }
+  context->eax = ( context->eax & 0xFFFFFF00 ) | ( k & 0xFF );
+  context->code+=2;
+  context->eip+=2;
+}
 HANDLER_DEF_END
 
+HANDLER_DEF_BEGIN(add_eax_imm32_handler) {
+
+  assert( context->code[0] == 0x05 );
+  uint32_t i =context->eax;//AX
+  uint32_t j =*((uint32_t *)(&context->code[1]));//imm32
+  uint32_t k = i + j;
+
+  if( k < i )
+    SETCF(context->eflags);
+  else
+    UNSETCF(context->eflags);
+
+  if( (i ^ j) & 0x80000000 )
+    UNSETOF(context->eflags);
+  else if( (i ^ k) & 0x80000000 )
+    SETOF(context->eflags);
+  else
+    UNSETOF(context->eflags);
+
+  if( (k & 0x80000000) > 0 )
+    SETSF(context->eflags);
+  else
+    UNSETSF(context->eflags);
+
+  if( k == 0 )
+    SETZF(context->eflags);
+  else
+    UNSETZF(context->eflags);
+
+  UNSETAF(context->eflags);
+
+  if( parity_table[k & 0xFF] )
+    SETPF(context->eflags);
+  else
+    UNSETPF(context->eflags);
+
+  context->eax = k;
+  context->code+=4;
+  context->eip+=4;
+}
+HANDLER_DEF_END
+
+HANDLER_DEF_BEGIN(add_rm8_imm8_handler) {
+    uint32_t i;
+    uint32_t j;
+    uint32_t k;
+
+    assert( context->code[0] == 0x80 );
+
+    uint32_t displacement = INT32_MAX;
+    uint8_t *dest;
+
+    switch( GETEXTOPCODE(i) ) {
+    case 0:
+      {
+        if( GETMOD(context->code[1]) == 3 ) {
+          dest = (uint8_t *)&GETREG(context,GETRM(context->code[1]));
+          displacement++;
+          
+        }
+        else {
+          i = resolve_rm(context->general_purpose_registers, &context->code[1], &displacement );
+          dest = get_real_address( i, table, READ );
+          if( dest == NULL ) {
+            fprintf( stderr, "ERROR: Invalid destination address for ADD rm8, imm8\n");
+            assert(0);
+          }
+        }
+
+        i = *dest;
+        j = context->code[1+displacement];
+        k = i + j;
+
+        if( k >> 8 )
+          SETCF(context->eflags);
+        else
+          UNSETCF(context->eflags);
+
+        if( (i ^ j) & 0x80 )
+          UNSETOF(context->eflags);
+        else if( (i ^ k) & 0x80 )
+          SETOF(context->eflags);
+        else
+          UNSETOF(context->eflags);
+
+        if( (k & 0x80) > 0 )
+          SETSF(context->eflags);
+        else
+          UNSETSF(context->eflags);
+
+        if( k == 0 )
+          SETZF(context->eflags);
+        else
+          UNSETZF(context->eflags);
+
+        UNSETAF(context->eflags);
+
+        if( parity_table[k & 0xFF] )
+          SETPF(context->eflags);
+        else
+          UNSETPF(context->eflags);
+
+        *dest = k;
+        context->eip +=displacement+2;
+        context->code += displacement+2;
+      }
+      break;
+    default:
+      fprintf( stderr, "ERROR: Undefined extended opcode for CALL\n");
+      assert(0);
+      break;
+    }
+}
+HANDLER_DEF_END
 #ifndef _WIN32
 }
 #else
@@ -370,52 +490,9 @@ HANDLER_DEF_BEGIN( dispatch )
 HANDLER_DEF_END
 #endif
 
-void print_access_violation( uint32_t virtual_address, unsigned int requested_access ) {
-  char *access_string;
-  switch( requested_access ) {
-  case READ | WRITE:
-    access_string = "reading/writing";
-    break;
-  case READ:
-    access_string = "reading";
-    break;
-  case WRITE:
-    access_string = "writing";
-    break;
-  case EXECUTE:
-    access_string = "executing";
-    break;
-  default:
-    access_string = "accessing";
-    break;
-  }
-
-  fprintf( stderr, "ERROR: Access violation while %s [%08X]", access_string, virtual_address );
-  assert(0);
-}
-
-inline unsigned char * get_real_address( uint32_t virtual_address, VirtualDirectoryLookupTable_t *directory_lookup_table, unsigned int requested_access )
-{
-  if( directory_lookup_table->tlb_key == ( virtual_address >> 12 ) )
-    return directory_lookup_table->tlb_value + ( virtual_address & 4095 );
-  else {
-    VirtualPageLookupTable_t *page_lookup_table;
-    if( page_lookup_table = directory_lookup_table->page_lookup_table[virtual_address >> 22] ) {
-      unsigned char *frame;
-      if( frame = page_lookup_table->frames[(virtual_address >> 12) & 1023]) {
-        directory_lookup_table->tlb_key = ( virtual_address >> 12 );
-        directory_lookup_table->tlb_value = frame;
-        return frame + ( virtual_address & 4095 );
-      }
-    }
-  }
-
-  print_access_violation( virtual_address, requested_access );
-  return NULL;
-}
 
 
-int interpret( RuntimeEnvironment_t *environment, ThreadNode_t *thread )
+int interpret( RuntimeEnvironment_t *const environment, ThreadNode_t *const thread )
 {
   return dispatch( &thread->context, &environment->directory_table );
 }
