@@ -49,7 +49,6 @@ uint32_t insert_new_page_in_between( VirtualPageNode_t * prev, uint32_t requeste
   update_virtual_memory_lookup_table_on_create( environment, prev->next );
   return prev->next->begin;
 }
-
 uint32_t create_virtual_memory_page( RuntimeEnvironment_t *environment, uint32_t requested_size = UNSPECIFIED_SIZE, uint32_t requested_base = UNSPECIFIED_BASE, unsigned char *initial_data = NULL, uint32_t initial_data_size = UNSPECIFIED_SIZE  ){
 
   VirtualPageNode_t *next = environment->page_list->next;

@@ -32,6 +32,15 @@
     <ClCompile Include="src\runtime.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\interpreter_add.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\interpreter_opcode_dispatch_table.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\interpreter_prefix_table.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\image.h">
@@ -54,6 +63,9 @@
     </ClInclude>
     <ClInclude Include="3p\include\semaphore.h">
       <Filter>3p</Filter>
+    </ClInclude>
+    <ClInclude Include="include\interpreter_util.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
