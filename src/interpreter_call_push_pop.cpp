@@ -3,7 +3,7 @@
 #endif
 
 HANDLER_DEF_BEGIN(push_imm8_handler){
-  assert( context->code[0] == 6A );
+  assert( context->code[0] == 0x6A );
 
   context->esp-=sizeof(uint32_t);
   uint32_t *dest = (uint32_t *)get_real_address( context->esp, table, WRITE );
@@ -14,7 +14,7 @@ HANDLER_DEF_BEGIN(push_imm8_handler){
 HANDLER_DEF_END
 
   HANDLER_DEF_BEGIN(push_imm32_handler){
-    assert( context->code[0] == 68 );
+    assert( context->code[0] == 0x68 );
 
     context->esp-=sizeof(uint32_t);
     uint32_t *dest = (uint32_t *)get_real_address( context->esp, table, WRITE );
@@ -169,6 +169,66 @@ HANDLER_DEF_BEGIN(push_r1632_handler) {
   
 }
 HANDLER_DEF_END
+HANDLER_DEF_BEGIN(pop_r32_handler) {
+
+  uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE );
+  context->esp+=sizeof(uint32_t);
+
+  switch( context->code[0] ) {
+  case 0x58:
+  case 0x59:
+  case 0x5A:
+  case 0x5B:
+  case 0x5C:
+  case 0x5D:
+  case 0x5E:
+  case 0x5F:
+    GETREG(context,context->code[0]-0x58) = *stack;
+    break;
+  default:
+    fprintf( stderr, "ERROR: Invalid opcode for POP r\n");
+    assert(0);
+    break;
+  }
+  context->eip++;
+  context->code++;
+}
+HANDLER_DEF_END
+HANDLER_DEF_BEGIN(pop_r1632_handler) {
+  uint32_t prefixes = get_prefixes( &context->code, &context->eip );
+
+  uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE );
+
+  if( prefixes & PREFIX_OPERAND_SIZE_OVERRIDE )
+    context->esp+=sizeof(uint16_t);
+  else
+    context->esp+=sizeof(uint32_t);
+
+  switch( context->code[0] ) {
+  case 0x58:
+  case 0x59:
+  case 0x5A:
+  case 0x5B:
+  case 0x5C:
+  case 0x5D:
+  case 0x5E:
+  case 0x5F:
+    if( prefixes & PREFIX_OPERAND_SIZE_OVERRIDE )
+      *((uint16_t *)&GETREG(context,context->code[0]-0x58)) = *stack;
+    else
+      GETREG(context,context->code[0]-0x58) = *stack;
+    break;
+  default:
+    fprintf( stderr, "ERROR: Invalid opcode for POP r\n");
+    assert(0);
+    break;
+  }
+
+  context->eip++;
+  context->code++;
+
+}
+HANDLER_DEF_END
   HANDLER_DEF_BEGIN(callpush_rm1632_handler) {
     uint32_t prefixes = get_prefixes( &context->code, &context->eip );
     assert( context->code[0] == 0xFF );
@@ -213,8 +273,8 @@ HANDLER_DEF_END
           uint16_t *stack = (uint16_t *)get_real_address( context->esp, table, WRITE );
           *stack = (uint16_t)value;
         } else {
-          uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE );
           context->esp-=sizeof(uint32_t);
+          uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE );
           *stack = value;
         }
         context->eip += displacement+1;
@@ -248,9 +308,9 @@ HANDLER_DEF_END
           fprintf( stderr, "ERROR: Invalid destination address for CALL rm32\n");
           assert(0);
         }
-        uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE );
         context->esp-=sizeof(uint32_t);
         context->eip += displacement+1;
+        uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE );
         *stack = context->eip;
         context->eip = value;
         context->code = dest;
@@ -270,5 +330,63 @@ HANDLER_DEF_END
       assert(0);
       break;
     }
+}
+HANDLER_DEF_END
+
+HANDLER_DEF_BEGIN(pop_rm1632_handler) {
+  uint32_t prefixes = get_prefixes( &context->code, &context->eip );
+  assert( context->code[0] == 0x8F );
+
+  uint32_t displacement = INT32_MAX;
+  uint32_t *dest;
+
+  dest = (uint32_t *)get_rm( &context->code[1], context->general_purpose_registers, &displacement, table);
+
+  switch( GETEXTOPCODE(context->code[1]) ) {
+  case 6:
+    {
+      if ( prefixes & PREFIX_OPERAND_SIZE_OVERRIDE ) {
+        uint16_t *stack = (uint16_t *)get_real_address( context->esp, table, WRITE );
+        *((uint16_t *)dest) = *stack;
+        context->esp+=sizeof(uint16_t);
+      } else {
+        uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE );
+        *dest = *stack;
+        context->esp+=sizeof(uint32_t);
+      }
+      context->eip += displacement+1;
+      context->code += displacement+1;
+    }
+    break;
+  default:
+    fprintf( stderr, "ERROR: Undefined extended opcode for 0x8F (POP rm1632)\n");
+    assert(0);
+    break;
+  }
+}
+HANDLER_DEF_END
+
+HANDLER_DEF_BEGIN(pop_rm32_handler) {
+
+  assert( context->code[0] == 0x8F );
+
+  uint32_t displacement = INT32_MAX;
+  unsigned char *dest;
+
+  dest = (unsigned char*)get_rm( &context->code[1], context->general_purpose_registers, &displacement, table);
+
+  switch( GETEXTOPCODE(context->code[1]) ) {
+  case 6:
+    {
+      uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE );
+      *dest = *stack;
+      context->esp+=sizeof(uint32_t);
+    }
+    break;
+  default:
+    fprintf( stderr, "ERROR: Undefined extended opcode for 0x8F (POP rm32)\n");
+    assert(0);
+    break;
+  }
 }
 HANDLER_DEF_END

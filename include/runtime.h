@@ -34,12 +34,18 @@ typedef struct VirtualDirectoryLookupTable {
 
 typedef struct ThreadContext {
   
-  uint16_t gs;
-  uint16_t fs;
-  uint16_t es;
-  uint16_t ds;
-  uint16_t cs;
-  uint16_t ss;
+  union {
+    uint16_t segment_registers[6];
+    struct {
+      uint16_t es;
+      uint16_t cs;
+      uint16_t ss;
+      uint16_t ds;
+      uint16_t fs;
+      uint16_t gs;
+    };
+  };
+  
 
   union {
     uint32_t general_purpose_registers[8];

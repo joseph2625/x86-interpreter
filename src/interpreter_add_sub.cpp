@@ -46,7 +46,7 @@ HANDLER_DEF_END
     case 0:
     case 5:
       {
-        dest = (uint8_t *)get_rm( &context->code[1], context->general_purpose_registers, &displacement, table);
+        dest = get_rm8( &context->code[1], context->general_purpose_registers, &displacement, table);
         perform_8bit_arithmetic( *dest, context->code[1+displacement], dest, &context->eflags, GETEXTOPCODE(context->code[1]) == 0);
         context->eip +=displacement+2;
         context->code += displacement+2;
@@ -66,9 +66,9 @@ HANDLER_DEF_END
     uint32_t displacement = INT32_MAX;
     uint8_t *dest;
 
-    dest = (uint8_t *)get_rm( &context->code[1], context->general_purpose_registers, &displacement, table);
+    dest = get_rm8( &context->code[1], context->general_purpose_registers, &displacement, table);
     perform_8bit_arithmetic( *dest, GETREG(context, GETREGNUM(context->code[1])), dest, &context->eflags, context->code[0] == 0x00 );
-    
+
     context->eip +=displacement+1;
     context->code += displacement+1;
 }
@@ -81,7 +81,7 @@ HANDLER_DEF_END
     uint32_t displacement = INT32_MAX;
     uint8_t *src;
 
-    src = (uint8_t *)get_rm( &context->code[1], context->general_purpose_registers, &displacement, table);
+    src = get_rm8( &context->code[1], context->general_purpose_registers, &displacement, table);
     perform_8bit_arithmetic( GETREG(context, GETREGNUM(context->code[1])), *src, (uint8_t *)&GETREG(context, GETREGNUM(context->code[1])), &context->eflags, context->code[0] == 0x02 );
     context->eip +=displacement+1;
     context->code += displacement+1;
@@ -206,7 +206,7 @@ HANDLER_DEF_END
       }
       break;
     default:
-      fprintf( stderr, "ERROR: Undefined extended opcode for ADD/SUB (ADD/SUB rm32, imm32)\n");
+      fprintf( stderr, "ERROR: Undefined extended opcode for ADD/SUB (ADD/SUB rm1632, imm1632)\n");
       assert(0);
       break;
     }

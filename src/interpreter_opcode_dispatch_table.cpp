@@ -94,14 +94,14 @@ int (FASTCALL * opcode_dispatch_table[256]) (ThreadContext_t *, VirtualDirectory
   HANDLER_DECL(push_r32_handler), //0x55
   HANDLER_DECL(push_r32_handler), //0x56
   HANDLER_DECL(push_r32_handler), //0x57
-  HANDLER_DECL(undefined_opcode_handler), //0x58
-  HANDLER_DECL(undefined_opcode_handler), //0x59
-  HANDLER_DECL(undefined_opcode_handler), //0x5A
-  HANDLER_DECL(undefined_opcode_handler), //0x5B
-  HANDLER_DECL(undefined_opcode_handler), //0x5C
-  HANDLER_DECL(undefined_opcode_handler), //0x5D
-  HANDLER_DECL(undefined_opcode_handler), //0x5E
-  HANDLER_DECL(undefined_opcode_handler), //0x5F
+  HANDLER_DECL(pop_r32_handler), //0x58
+  HANDLER_DECL(pop_r32_handler), //0x59
+  HANDLER_DECL(pop_r32_handler), //0x5A
+  HANDLER_DECL(pop_r32_handler), //0x5B
+  HANDLER_DECL(pop_r32_handler), //0x5C
+  HANDLER_DECL(pop_r32_handler), //0x5D
+  HANDLER_DECL(pop_r32_handler), //0x5E
+  HANDLER_DECL(pop_r32_handler), //0x5F
   HANDLER_DECL(undefined_opcode_handler), //0x60
   HANDLER_DECL(undefined_opcode_handler), //0x61
   HANDLER_DECL(undefined_opcode_handler), //0x62
@@ -142,14 +142,14 @@ int (FASTCALL * opcode_dispatch_table[256]) (ThreadContext_t *, VirtualDirectory
   HANDLER_DECL(undefined_opcode_handler), //0x85
   HANDLER_DECL(undefined_opcode_handler), //0x86
   HANDLER_DECL(undefined_opcode_handler), //0x87
-  HANDLER_DECL(undefined_opcode_handler), //0x88
-  HANDLER_DECL(undefined_opcode_handler), //0x89
-  HANDLER_DECL(undefined_opcode_handler), //0x8A
-  HANDLER_DECL(undefined_opcode_handler), //0x8B
-  HANDLER_DECL(undefined_opcode_handler), //0x8C
-  HANDLER_DECL(undefined_opcode_handler), //0x8D
-  HANDLER_DECL(undefined_opcode_handler), //0x8E
-  HANDLER_DECL(undefined_opcode_handler), //0x8F
+  HANDLER_DECL(mov_rm8_r8_handler), //0x88
+  HANDLER_DECL(mov_rm32_r32_handler), //0x89
+  HANDLER_DECL(mov_r8_rm8_handler), //0x8A
+  HANDLER_DECL(mov_r32_rm32_handler), //0x8B
+  HANDLER_DECL(mov_rm16_sreg_handler), //0x8C
+  HANDLER_DECL(lea_r32_rm32_handler), //0x8D
+  HANDLER_DECL(mov_rm16_sreg_handler), //0x8E
+  HANDLER_DECL(pop_rm32_handler), //0x8F
   HANDLER_DECL(undefined_opcode_handler), //0x90
   HANDLER_DECL(undefined_opcode_handler), //0x91
   HANDLER_DECL(undefined_opcode_handler), //0x92
@@ -166,10 +166,10 @@ int (FASTCALL * opcode_dispatch_table[256]) (ThreadContext_t *, VirtualDirectory
   HANDLER_DECL(undefined_opcode_handler), //0x9D
   HANDLER_DECL(undefined_opcode_handler), //0x9E
   HANDLER_DECL(undefined_opcode_handler), //0x9F
-  HANDLER_DECL(undefined_opcode_handler), //0xA0
-  HANDLER_DECL(undefined_opcode_handler), //0xA1
-  HANDLER_DECL(undefined_opcode_handler), //0xA2
-  HANDLER_DECL(undefined_opcode_handler), //0xA3
+  HANDLER_DECL(mov_al_moffs8_handler), //0xA0
+  HANDLER_DECL(mov_ar_moffs1632_handler), //0xA1
+  HANDLER_DECL(mov_moffs8_al_handler), //0xA2
+  HANDLER_DECL(mov_moffs1632_ar_handler), //0xA3
   HANDLER_DECL(undefined_opcode_handler), //0xA4
   HANDLER_DECL(undefined_opcode_handler), //0xA5
   HANDLER_DECL(undefined_opcode_handler), //0xA6
@@ -182,36 +182,36 @@ int (FASTCALL * opcode_dispatch_table[256]) (ThreadContext_t *, VirtualDirectory
   HANDLER_DECL(undefined_opcode_handler), //0xAD
   HANDLER_DECL(undefined_opcode_handler), //0xAE
   HANDLER_DECL(undefined_opcode_handler), //0xAF
-  HANDLER_DECL(undefined_opcode_handler), //0xB0
-  HANDLER_DECL(undefined_opcode_handler), //0xB1
-  HANDLER_DECL(undefined_opcode_handler), //0xB2
-  HANDLER_DECL(undefined_opcode_handler), //0xB3
-  HANDLER_DECL(undefined_opcode_handler), //0xB4
-  HANDLER_DECL(undefined_opcode_handler), //0xB5
-  HANDLER_DECL(undefined_opcode_handler), //0xB6
-  HANDLER_DECL(undefined_opcode_handler), //0xB7
-  HANDLER_DECL(undefined_opcode_handler), //0xB8
-  HANDLER_DECL(undefined_opcode_handler), //0xB9
-  HANDLER_DECL(undefined_opcode_handler), //0xBA
-  HANDLER_DECL(undefined_opcode_handler), //0xBB
-  HANDLER_DECL(undefined_opcode_handler), //0xBC
-  HANDLER_DECL(undefined_opcode_handler), //0xBD
-  HANDLER_DECL(undefined_opcode_handler), //0xBE
-  HANDLER_DECL(undefined_opcode_handler), //0xBF
+  HANDLER_DECL(mov_r8_imm8_handler), //0xB0
+  HANDLER_DECL(mov_r8_imm8_handler), //0xB1
+  HANDLER_DECL(mov_r8_imm8_handler), //0xB2
+  HANDLER_DECL(mov_r8_imm8_handler), //0xB3
+  HANDLER_DECL(mov_r8_imm8_handler), //0xB4
+  HANDLER_DECL(mov_r8_imm8_handler), //0xB5
+  HANDLER_DECL(mov_r8_imm8_handler), //0xB6
+  HANDLER_DECL(mov_r8_imm8_handler), //0xB7
+  HANDLER_DECL(mov_r32_imm32_handler), //0xB8
+  HANDLER_DECL(mov_r32_imm32_handler), //0xB9
+  HANDLER_DECL(mov_r32_imm32_handler), //0xBA
+  HANDLER_DECL(mov_r32_imm32_handler), //0xBB
+  HANDLER_DECL(mov_r32_imm32_handler), //0xBC
+  HANDLER_DECL(mov_r32_imm32_handler), //0xBD
+  HANDLER_DECL(mov_r32_imm32_handler), //0xBE
+  HANDLER_DECL(mov_r32_imm32_handler), //0xBF
   HANDLER_DECL(undefined_opcode_handler), //0xC0
   HANDLER_DECL(undefined_opcode_handler), //0xC1
-  HANDLER_DECL(undefined_opcode_handler), //0xC2
-  HANDLER_DECL(undefined_opcode_handler), //0xC3
+  HANDLER_DECL(ret_handler), //0xC2
+  HANDLER_DECL(ret_handler), //0xC3
   HANDLER_DECL(undefined_opcode_handler), //0xC4
   HANDLER_DECL(undefined_opcode_handler), //0xC5
-  HANDLER_DECL(undefined_opcode_handler), //0xC6
-  HANDLER_DECL(undefined_opcode_handler), //0xC7
+  HANDLER_DECL(mov_rm8_imm8_handler), //0xC6
+  HANDLER_DECL(mov_rm32_imm32_handler), //0xC7
   HANDLER_DECL(undefined_opcode_handler), //0xC8
-  HANDLER_DECL(undefined_opcode_handler), //0xC9
+  HANDLER_DECL(leave32_handler), //0xC9
   HANDLER_DECL(undefined_opcode_handler), //0xCA
   HANDLER_DECL(undefined_opcode_handler), //0xCB
   HANDLER_DECL(undefined_opcode_handler), //0xCC
-  HANDLER_DECL(undefined_opcode_handler), //0xCD
+  HANDLER_DECL(interrupt_handler), //0xCD
   HANDLER_DECL(undefined_opcode_handler), //0xCE
   HANDLER_DECL(undefined_opcode_handler), //0xCF
   HANDLER_DECL(undefined_opcode_handler), //0xD0
@@ -359,14 +359,14 @@ static void *opcode_with_prefix_dispatch_table[256] =
     HANDLER_DECL(push_r1632_handler), //0x55
     HANDLER_DECL(push_r1632_handler), //0x56
     HANDLER_DECL(push_r1632_handler), //0x57
-    HANDLER_DECL(undefined_opcode_handler), //0x58
-    HANDLER_DECL(undefined_opcode_handler), //0x59
-    HANDLER_DECL(undefined_opcode_handler), //0x5A
-    HANDLER_DECL(undefined_opcode_handler), //0x5B
-    HANDLER_DECL(undefined_opcode_handler), //0x5C
-    HANDLER_DECL(undefined_opcode_handler), //0x5D
-    HANDLER_DECL(undefined_opcode_handler), //0x5E
-    HANDLER_DECL(undefined_opcode_handler), //0x5F
+    HANDLER_DECL(pop_r1632_handler), //0x58
+    HANDLER_DECL(pop_r1632_handler), //0x59
+    HANDLER_DECL(pop_r1632_handler), //0x5A
+    HANDLER_DECL(pop_r1632_handler), //0x5B
+    HANDLER_DECL(pop_r1632_handler), //0x5C
+    HANDLER_DECL(pop_r1632_handler), //0x5D
+    HANDLER_DECL(pop_r1632_handler), //0x5E
+    HANDLER_DECL(pop_r1632_handler), //0x5F
     HANDLER_DECL(undefined_opcode_handler), //0x60
     HANDLER_DECL(undefined_opcode_handler), //0x61
     HANDLER_DECL(undefined_opcode_handler), //0x62
@@ -408,13 +408,13 @@ static void *opcode_with_prefix_dispatch_table[256] =
     HANDLER_DECL(undefined_opcode_handler), //0x86
     HANDLER_DECL(undefined_opcode_handler), //0x87
     HANDLER_DECL(undefined_opcode_handler), //0x88
-    HANDLER_DECL(undefined_opcode_handler), //0x89
+    HANDLER_DECL(mov_rm1632_r1632_handler), //0x89
     HANDLER_DECL(undefined_opcode_handler), //0x8A
-    HANDLER_DECL(undefined_opcode_handler), //0x8B
+    HANDLER_DECL(mov_r1632_rm1632_handler), //0x8B
     HANDLER_DECL(undefined_opcode_handler), //0x8C
-    HANDLER_DECL(undefined_opcode_handler), //0x8D
+    HANDLER_DECL(lea_r1632_rm1632_handler), //0x8D
     HANDLER_DECL(undefined_opcode_handler), //0x8E
-    HANDLER_DECL(undefined_opcode_handler), //0x8F
+    HANDLER_DECL(pop_rm1632_handler), //0x8F
     HANDLER_DECL(undefined_opcode_handler), //0x90
     HANDLER_DECL(undefined_opcode_handler), //0x91
     HANDLER_DECL(undefined_opcode_handler), //0x92
@@ -431,10 +431,10 @@ static void *opcode_with_prefix_dispatch_table[256] =
     HANDLER_DECL(undefined_opcode_handler), //0x9D
     HANDLER_DECL(undefined_opcode_handler), //0x9E
     HANDLER_DECL(undefined_opcode_handler), //0x9F
-    HANDLER_DECL(undefined_opcode_handler), //0xA0
-    HANDLER_DECL(undefined_opcode_handler), //0xA1
-    HANDLER_DECL(undefined_opcode_handler), //0xA2
-    HANDLER_DECL(undefined_opcode_handler), //0xA3
+    HANDLER_DECL(mov_al_moffs8_handler), //0xA0
+    HANDLER_DECL(mov_ar_moffs1632_handler), //0xA1
+    HANDLER_DECL(mov_moffs8_al_handler), //0xA2
+    HANDLER_DECL(mov_moffs1632_ar_handler), //0xA3
     HANDLER_DECL(undefined_opcode_handler), //0xA4
     HANDLER_DECL(undefined_opcode_handler), //0xA5
     HANDLER_DECL(undefined_opcode_handler), //0xA6
@@ -455,14 +455,14 @@ static void *opcode_with_prefix_dispatch_table[256] =
     HANDLER_DECL(undefined_opcode_handler), //0xB5
     HANDLER_DECL(undefined_opcode_handler), //0xB6
     HANDLER_DECL(undefined_opcode_handler), //0xB7
-    HANDLER_DECL(undefined_opcode_handler), //0xB8
-    HANDLER_DECL(undefined_opcode_handler), //0xB9
-    HANDLER_DECL(undefined_opcode_handler), //0xBA
-    HANDLER_DECL(undefined_opcode_handler), //0xBB
-    HANDLER_DECL(undefined_opcode_handler), //0xBC
-    HANDLER_DECL(undefined_opcode_handler), //0xBD
-    HANDLER_DECL(undefined_opcode_handler), //0xBE
-    HANDLER_DECL(undefined_opcode_handler), //0xBF
+    HANDLER_DECL(mov_r1632_imm1632_handler), //0xB8
+    HANDLER_DECL(mov_r1632_imm1632_handler), //0xB9
+    HANDLER_DECL(mov_r1632_imm1632_handler), //0xBA
+    HANDLER_DECL(mov_r1632_imm1632_handler), //0xBB
+    HANDLER_DECL(mov_r1632_imm1632_handler), //0xBC
+    HANDLER_DECL(mov_r1632_imm1632_handler), //0xBD
+    HANDLER_DECL(mov_r1632_imm1632_handler), //0xBE
+    HANDLER_DECL(mov_r1632_imm1632_handler), //0xBF
     HANDLER_DECL(undefined_opcode_handler), //0xC0
     HANDLER_DECL(undefined_opcode_handler), //0xC1
     HANDLER_DECL(undefined_opcode_handler), //0xC2
@@ -470,9 +470,9 @@ static void *opcode_with_prefix_dispatch_table[256] =
     HANDLER_DECL(undefined_opcode_handler), //0xC4
     HANDLER_DECL(undefined_opcode_handler), //0xC5
     HANDLER_DECL(undefined_opcode_handler), //0xC6
-    HANDLER_DECL(undefined_opcode_handler), //0xC7
+    HANDLER_DECL(mov_rm1632_imm1632_handler), //0xC7
     HANDLER_DECL(undefined_opcode_handler), //0xC8
-    HANDLER_DECL(undefined_opcode_handler), //0xC9
+    HANDLER_DECL(leave1632_handler), //0xC9
     HANDLER_DECL(undefined_opcode_handler), //0xCA
     HANDLER_DECL(undefined_opcode_handler), //0xCB
     HANDLER_DECL(undefined_opcode_handler), //0xCC

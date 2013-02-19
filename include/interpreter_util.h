@@ -378,7 +378,7 @@ inline uint32_t resolve_rm( const uint32_t *general_purpose_registers, const uns
   case 5:
   case 6:
   case 7:
-    return_value = general_purpose_registers[GETMOD(code[0])];
+    return_value = general_purpose_registers[GETRM(code[0])];
     break;
   case 4:
     code_displacement++;
@@ -432,7 +432,7 @@ inline uint32_t resolve_rm( const uint32_t *general_purpose_registers, const uns
   case 0:
     break;
   case 1:
-    return_value += code[code_displacement];
+    return_value += (int8_t)code[code_displacement];
     code_displacement++;
     break;
   case 2:
@@ -472,6 +472,35 @@ inline void *get_rm( unsigned char *modrm_pointer, uint32_t *const registers, ui
   void *dest;
   if( GETMOD(modrm_pointer[0]) == 3 ) {
     dest = &registers[GETRM(modrm_pointer[0])];
+    *displacement=1;
+  }
+  else {
+    dest = get_real_address( resolve_rm(registers, modrm_pointer, displacement ), table, READ );
+    if( dest == NULL ) {
+      assert(0);
+    }
+  }
+
+  return dest;
+}
+inline uint8_t *get_rm8( unsigned char *modrm_pointer, uint32_t *const registers, uint32_t *displacement, VirtualDirectoryLookupTable_t *table ){
+  uint8_t *dest;
+  if( GETMOD(modrm_pointer[0]) == 3 ) {
+    switch(GETRM(modrm_pointer[0])){
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+      dest = (uint8_t *)&registers[GETRM(modrm_pointer[0])];
+      break;
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+      dest = (uint8_t *)&registers[GETRM(modrm_pointer[0])];
+      dest++;
+      break;
+    }
     *displacement=1;
   }
   else {

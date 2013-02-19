@@ -5,6 +5,117 @@
 #ifndef _WIN32
 #include "interpreter_opcode_dispatch_table.cpp"
 #endif
+HANDLER_DEF_BEGIN(interrupt_handler) {
+  switch(context->code[1]){
+  case 0x80:
+    switch(context->eax) {
+    case 1:
+      fprintf( stdout, "INFO: sys_exit invoked. Exiting...\n");
+      __asm {
+        mov ecx, context
+        lea ecx, [ecx]context.ebx
+        mov eax, [ecx]
+        mov esp, ebp
+        pop edi
+        pop esi
+        pop ebx
+        pop ebp
+        ret
+      }
+      break;
+    default:
+      fprintf( stderr, "ERROR: Invalid syscall number\n");
+      break;
+    }
+    break;
+  default:
+    fprintf( stderr, "ERROR: Invalid interrupt vector number\n");
+    assert(0);
+  }
+}
+HANDLER_DEF_END
+HANDLER_DEF_BEGIN(ret_handler){
+  assert( context->code[0] == 0xC2 || context->code[0] == 0xC3);
+
+  uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, READ );
+  context->eip = *stack;
+  unsigned char*ret_address = get_real_address( context->eip, table, EXECUTE );
+
+  if( context->code[0] == 0xC3 ) {
+    context->esp+=4;
+  } else {
+    context->esp+=4+(*((uint16_t *)&context->code[1]));
+  }
+  context->code = ret_address;
+}
+HANDLER_DEF_END
+HANDLER_DEF_BEGIN(leave1632_handler) {
+  uint32_t prefixes = get_prefixes( &context->code, &context->eip );
+  assert( context->code[0] == 0xC9);
+
+  if( prefixes & PREFIX_OPERAND_SIZE_OVERRIDE ){
+    *((uint16_t *)&context->esp) = context->ebp;
+    uint16_t *stack = (uint16_t *)get_real_address( context->esp, table, READ );
+    *((uint16_t *)&context->ebp) = *stack;
+    context->esp += 2;
+  } else {
+    context->esp = context->ebp;
+    uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, READ );
+    context->ebp = *stack;
+    context->esp += 4;
+  }
+
+  context->eip+=1;
+  context->code+=1;
+}
+HANDLER_DEF_END
+HANDLER_DEF_BEGIN(leave32_handler) {
+  assert( context->code[0] == 0xC9);
+  context->esp = context->ebp;
+  uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, READ );
+  context->ebp = *stack;
+  context->esp += 4;
+
+  context->eip+=1;
+  context->code+=1;
+}
+HANDLER_DEF_END
+
+HANDLER_DEF_BEGIN(lea_r1632_rm1632_handler) {
+
+  uint32_t prefixes = get_prefixes( &context->code, &context->eip);
+  assert( context->code[0] == 0x8D);
+
+  uint32_t displacement = INT32_MAX;
+  uint32_t src;
+
+  src = (uint32_t)get_rm( &context->code[1], context->general_purpose_registers, &displacement, table);
+
+  if( prefixes & PREFIX_OPERAND_SIZE_OVERRIDE ) {
+    *((uint16_t *)&GETREG(context, GETREGNUM(context->code[1]))) = src;
+  } else {
+    GETREG(context, GETREGNUM(context->code[1])) = src;
+  }
+
+  context->eip +=displacement+1;
+  context->code += displacement+1;
+}
+HANDLER_DEF_END
+  HANDLER_DEF_BEGIN(lea_r32_rm32_handler) {
+    assert( context->code[0] == 0x8D );
+
+    uint32_t displacement = INT32_MAX;
+    uint32_t src;
+
+    src = (uint32_t)get_rm( &context->code[1], context->general_purpose_registers, &displacement, table);
+
+    GETREG(context, GETREGNUM(context->code[1])) = src;
+    context->eip +=displacement+1;
+    context->code += displacement+1;
+}
+HANDLER_DEF_END
+
+
 HANDLER_DEF_BEGIN(prefix_handler)
 #ifdef _WIN32
 __asm{
@@ -89,7 +200,7 @@ HANDLER_DEF_END
 
 
   HANDLER_DEF_BEGIN(undefined_opcode_handler) {
-    fprintf( stderr, "ERROR: Undefined opcode\n");
+    fprintf( stderr, "ERROR: Undefined opcode: %02X\n", context->code[0]);
 #ifndef _WIN32
     return -1;
 }
@@ -110,6 +221,7 @@ __asm {
 #ifndef _WIN32
 #include "interpreter_add_sub.cpp"
 #include "interpreter_call_push.cpp"
+#include "interpreter_mov.cpp"
 }
 #else
 HANDLER_DEF_BEGIN( dispatch )
