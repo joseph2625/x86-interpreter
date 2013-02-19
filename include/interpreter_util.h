@@ -176,14 +176,23 @@ inline uint32_t get_prefixes( unsigned char **code, uint32_t *eip ) {
   } while( true );
 }
 
-inline uint32_t update_eflags_for_32bit_arithmetics( uint32_t eflags, const uint32_t i, const uint32_t j, const uint32_t k ){
+inline uint32_t perform_32bit_arithmetic( const uint32_t i, const uint32_t j, uint32_t * dest, uint32_t *const context_eflags, const bool is_addition ){
+  uint32_t eflags = *context_eflags;
+  uint32_t k = (is_addition) ? i + j : i - j;
 
-  if( k < i )
-    SETCF(eflags);
-  else
-    UNSETCF(eflags);
+  if( is_addition ) {
+    if( k < i )
+      SETCF(eflags);
+    else
+      UNSETCF(eflags);
+  } else {
+    if( k > i )
+      SETCF(eflags);
+    else
+      UNSETCF(eflags);
+  }
 
-  if( (i ^ j) & 0x80000000 )
+  if( (((i ^ j) & 0x80000000) != 0) == is_addition)
     UNSETOF(eflags);
   else if( (i ^ k) & 0x80000000 )
     SETOF(eflags);
@@ -207,21 +216,34 @@ inline uint32_t update_eflags_for_32bit_arithmetics( uint32_t eflags, const uint
   else
     UNSETPF(eflags);
 
-  if( ( (i & 0xF) + (j & 0xF) ) > 15 )
-    SETAF(eflags);
-  else
-    UNSETAF(eflags);
+  if( is_addition ) {
+    if( ( (i & 0xF) + (j & 0xF) ) > 15 )
+      SETAF(eflags);
+    else
+      UNSETAF(eflags);
+  } else {
+    if( ( (int8_t)(i & 0xF) - (int8_t)(j & 0xF) ) < 0 )
+      SETAF(eflags);
+    else
+      UNSETAF(eflags);
+  }
 
-  return eflags;
+  *context_eflags = eflags;
+  *dest = k;
+  return k;
 }
-inline uint32_t update_eflags_for_16bit_arithmetics( uint32_t eflags, const uint32_t i, const uint32_t j, const uint32_t k ){
+inline uint16_t perform_16bit_arithmetic( uint32_t i, uint32_t j, uint16_t *dest, uint32_t *const context_eflags, const bool is_addition ){
 
+  i &=0xFFFF;
+  j &=0xFFFF;
+  uint32_t eflags = *context_eflags;
+  uint32_t k = (is_addition) ? i + j : i - j;
   if( k >> 16 )
     SETCF(eflags);
   else
     UNSETCF(eflags);
 
-  if( (i ^ j) & 0x8000 )
+  if( (((i ^ j) & 0x8000) != 0) == is_addition )
     UNSETOF(eflags);
   else if( (i ^ k) & 0x8000 )
     SETOF(eflags);
@@ -245,21 +267,35 @@ inline uint32_t update_eflags_for_16bit_arithmetics( uint32_t eflags, const uint
   else
     UNSETPF(eflags);
 
-  if( ( (i & 0xF) + (j & 0xF) ) > 15 )
-    SETAF(eflags);
-  else
-    UNSETAF(eflags);
+  if( is_addition ) {
+    if( ( (i & 0xF) + (j & 0xF) ) > 15 )
+      SETAF(eflags);
+    else
+      UNSETAF(eflags);
+  } else {
+    if( ( (int8_t)(i & 0xF) - (int8_t)(j & 0xF) ) < 0 )
+      SETAF(eflags);
+    else
+      UNSETAF(eflags);
+  }
+  
 
-  return eflags;
+  *context_eflags = eflags;
+  *dest = k;
+  return k;
 }
-inline uint32_t update_eflags_for_8bit_arithmetics( uint32_t eflags, const uint32_t i, const uint32_t j, const uint32_t k ){
+inline uint32_t perform_8bit_arithmetic( uint32_t i, uint32_t j, uint8_t *dest, uint32_t *const context_eflags, const bool is_addition ){
+  i &= 0xFF;
+  j &= 0xFF;
+  uint32_t eflags = *context_eflags;
+  uint32_t k = (is_addition) ? i + j : i - j;
 
   if( k >> 8 )
     SETCF(eflags);
   else
     UNSETCF(eflags);
 
-  if( (i ^ j) & 0x80 )
+  if( (( (i ^ j) & 0x80 ) != 0) == is_addition )
     UNSETOF(eflags);
   else if( (i ^ k) & 0x80 )
     SETOF(eflags);
@@ -283,12 +319,21 @@ inline uint32_t update_eflags_for_8bit_arithmetics( uint32_t eflags, const uint3
   else
     UNSETPF(eflags);
 
-  if( ( (i & 0xF) + (j & 0xF) ) > 15 )
-    SETAF(eflags);
-  else
-    UNSETAF(eflags);
+  if( is_addition ) {
+    if( ( (i & 0xF) + (j & 0xF) ) > 15 )
+      SETAF(eflags);
+    else
+      UNSETAF(eflags);
+  } else {
+    if( ( (int8_t)(i & 0xF) - (int8_t)(j & 0xF) ) < 0 )
+      SETAF(eflags);
+    else
+      UNSETAF(eflags);
+  }
 
-  return eflags;
+  *context_eflags = eflags;
+  *dest = k;
+  return k & 0xFF;
 }
 inline void print_access_violation( const uint32_t virtual_address, const unsigned int requested_access ) {
   char *access_string;
@@ -403,6 +448,7 @@ inline uint32_t resolve_rm( const uint32_t *general_purpose_registers, const uns
   *displacement = code_displacement;
   return return_value;  
 }
+
 inline unsigned char * get_real_address( const uint32_t virtual_address, VirtualDirectoryLookupTable_t *const directory_lookup_table, const unsigned int requested_access, const bool suppress_access_violation_assertion = false )
 {
   if( directory_lookup_table->tlb_key == ( virtual_address >> 12 ) )
@@ -422,7 +468,21 @@ inline unsigned char * get_real_address( const uint32_t virtual_address, Virtual
     print_access_violation( virtual_address, requested_access );
   return NULL;
 }
+inline void *get_rm( unsigned char *modrm_pointer, uint32_t *const registers, uint32_t *displacement, VirtualDirectoryLookupTable_t *table ){
+  void *dest;
+  if( GETMOD(modrm_pointer[0]) == 3 ) {
+    dest = &registers[GETRM(modrm_pointer[0])];
+    *displacement=1;
+  }
+  else {
+    dest = get_real_address( resolve_rm(registers, modrm_pointer, displacement ), table, READ );
+    if( dest == NULL ) {
+      assert(0);
+    }
+  }
 
+  return dest;
+}
 inline void dump_thread_context( ThreadContext_t *context, VirtualDirectoryLookupTable_t *table ){
   system("cls");
   printf( "EAX %08X\nECX %08X\nEDX %08X\nEBX %08X\nESP %08X\nEBP %08X\nESI %08X\nEDI %08X\n\nEIP %08X\n\nC %d ES %04X\nP %d CS %04X\nA %d SS %04X\nZ %d DS %04X\nS %d FS %04X\nT %d GS %04X\nD %d\nO %d\n\nEFL %08X\n\n",

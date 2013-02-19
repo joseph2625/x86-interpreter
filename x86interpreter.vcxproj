@@ -13,7 +13,7 @@
   <ItemGroup>
     <ClCompile Include="src\image.cpp" />
     <ClCompile Include="src\interpreter.cpp" />
-    <ClCompile Include="src\interpreter_add.cpp" />
+    <ClCompile Include="src\interpreter_add_sub.cpp" />
     <ClCompile Include="src\interpreter_call_push.cpp" />
     <ClCompile Include="src\interpreter_opcode_dispatch_table.cpp" />
     <ClCompile Include="src\main.cpp" />

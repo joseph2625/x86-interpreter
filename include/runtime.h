@@ -60,7 +60,6 @@ typedef struct ThreadContext {
   
 
   unsigned char *code;
-  unsigned char *stack;
 
 } ThreadContext_t;
 

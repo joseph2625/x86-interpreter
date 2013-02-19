@@ -32,13 +32,13 @@
     <ClCompile Include="src\runtime.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\interpreter_add.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\interpreter_opcode_dispatch_table.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\interpreter_call_push.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\interpreter_add_sub.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

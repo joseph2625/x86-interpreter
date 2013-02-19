@@ -193,9 +193,6 @@ bool create_thread( RuntimeEnvironment_t *environment, uint32_t entry_point, uin
 
 
   environment->threads->context.esp += stack_size - 8;
-  environment->threads->context.stack = get_real_address( environment->threads->context.esp, &environment->directory_table, READ | WRITE );
-
-
 
   PthreadContext_t *context = (PthreadContext_t *)malloc( sizeof(PthreadContext_t) );
   context->thread_node = environment->threads;

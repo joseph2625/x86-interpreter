@@ -108,7 +108,7 @@ __asm {
 #endif
 
 #ifndef _WIN32
-#include "interpreter_add.cpp"
+#include "interpreter_add_sub.cpp"
 #include "interpreter_call_push.cpp"
 }
 #else
