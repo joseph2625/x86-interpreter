@@ -130,7 +130,7 @@ static const bool parity_table[256] =
 #define UNSETVIP(eflags) ((eflags) = (eflags) & ~(1 << 20))
 #define UNSETID(eflags) ((eflags) = (eflags) & ~(1 << 21))
 
-inline uint32_t get_prefixes( unsigned char **code, uint32_t *eip, const uint8_t opcode ) {
+inline uint32_t get_prefixes( unsigned char **code, uint32_t *eip ) {
   uint32_t prefixes = 0;
   do{
     switch((*code)[0]) {
@@ -168,14 +168,12 @@ inline uint32_t get_prefixes( unsigned char **code, uint32_t *eip, const uint8_t
       prefixes |= PREFIX_ADDRESS_SIZE_OVERRIDE;
       break;
     default:
-      prefixes = PREFIX_INVALID;
       return prefixes;
       break;
     }
     (*eip)++;
     (*code)++;
-  } while((*code)[0] != opcode );
-  return prefixes;
+  } while( true );
 }
 
 inline uint32_t update_eflags_for_32bit_arithmetics( uint32_t eflags, const uint32_t i, const uint32_t j, const uint32_t k ){

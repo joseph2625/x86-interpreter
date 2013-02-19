@@ -4,9 +4,8 @@
 
 
 HANDLER_DEF_BEGIN(add_ar1632_imm1632_handler) {
-  uint32_t prefixes = get_prefixes( &context->code, &context->eip, 0x05);
-  assert(prefixes != PREFIX_INVALID );
-  
+  uint32_t prefixes = get_prefixes( &context->code, &context->eip);
+  assert( context->code[0] == 0x05);
   uint32_t i;
   uint32_t j;
   uint32_t k;
@@ -175,8 +174,8 @@ HANDLER_DEF_END
 }
 HANDLER_DEF_END
   HANDLER_DEF_BEGIN(add_rm1632_r1632_handler){
-    uint32_t prefixes = get_prefixes( &context->code, &context->eip, 0x01 );
-    assert(prefixes != PREFIX_INVALID );
+    uint32_t prefixes = get_prefixes( &context->code, &context->eip);
+    assert( context->code[0] == 0x01);
 
     uint32_t i;
     uint32_t j;
@@ -252,8 +251,8 @@ HANDLER_DEF_END
 HANDLER_DEF_END
   HANDLER_DEF_BEGIN(add_r1632_rm1632_handler) {
 
-    uint32_t prefixes = get_prefixes( &context->code, &context->eip, 0x03 );
-    assert( prefixes != PREFIX_INVALID );
+    uint32_t prefixes = get_prefixes( &context->code, &context->eip);
+    assert( context->code[0] == 0x03);
 
     uint32_t i;
     uint32_t j;
@@ -328,8 +327,8 @@ HANDLER_DEF_END
 }
 HANDLER_DEF_END
   HANDLER_DEF_BEGIN(add_rm1632_imm8_handler) {
-    uint32_t prefixes = get_prefixes( &context->code, &context->eip, 0x83);
-    assert(prefixes != PREFIX_INVALID );
+    uint32_t prefixes = get_prefixes( &context->code, &context->eip);
+    assert( context->code[0] == 0x83);
 
     uint32_t i;
     uint32_t j;
@@ -382,8 +381,8 @@ HANDLER_DEF_END
 }
 HANDLER_DEF_END
   HANDLER_DEF_BEGIN(add_rm1632_imm1632_handler) {
-    uint32_t prefixes = get_prefixes( &context->code, &context->eip, 0x81);
-    assert(prefixes != PREFIX_INVALID );
+    uint32_t prefixes = get_prefixes( &context->code, &context->eip);
+    assert( context->code[0] == 0x81);
 
     uint32_t i;
     uint32_t j;

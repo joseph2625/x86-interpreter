@@ -38,7 +38,7 @@
     <ClCompile Include="src\interpreter_opcode_dispatch_table.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\interpreter_prefix_table.cpp">
+    <ClCompile Include="src\interpreter_call_push.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
