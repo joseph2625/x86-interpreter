@@ -1,17 +1,32 @@
-#ifndef _WIN32
-void FASTCALL dispatch( ThreadContext_t *const context, VirtualDirectoryLookupTable_t *const table ){
-  static void *opcode_dispatch_table[256] = 
-#else
 #include "interpreter.h"
-int (FASTCALL * opcode_dispatch_table[256]) (ThreadContext_t *, VirtualDirectoryLookupTable_t *) = 
+
+#ifndef _WIN32
+#define DISPATCH_TABLE_DECL(name, size) static void *name[size] = 
+void FASTCALL dispatch( ThreadContext_t *const context, VirtualDirectoryLookupTable_t *const table ){
+#else
+#define DISPATCH_TABLE_DECL(name, size) int (FASTCALL * name[size]) (ThreadContext_t *, VirtualDirectoryLookupTable_t *) = 
 #endif
+
+DISPATCH_TABLE_DECL(addsubcmp_rm8_imm8_dispatch_table, 8)
+{
+  HANDLER_DECL(add_rm8_imm8_handler), //0x00
+  HANDLER_DECL(undefined_opcode_handler), //0x01
+  HANDLER_DECL(undefined_opcode_handler), //0x02
+  HANDLER_DECL(undefined_opcode_handler), //0x03
+  HANDLER_DECL(undefined_opcode_handler), //0x04
+  HANDLER_DECL(sub_rm8_imm8_handler), //0x05
+  HANDLER_DECL(undefined_opcode_handler), //0x06
+  HANDLER_DECL(cmp_rm8_imm8_handler), //0x07
+};
+
+DISPATCH_TABLE_DECL(opcode_dispatch_table, 256)
 {
   HANDLER_DECL(addsubcmp_rm8_r8_handler), //0x00
   HANDLER_DECL(addsubcmp_rm32_r32_handler), //0x01
   HANDLER_DECL(addsubcmp_r8_rm8_handler), //0x02
   HANDLER_DECL(addsubcmp_r32_rm32_handler), //0x03
-  HANDLER_DECL(addsubcmp_al_imm8_handler), //0x04
-  HANDLER_DECL(addsubcmp_eax_imm32_handler), //0x05
+  HANDLER_DECL(add_al_imm8_handler), //0x04
+  HANDLER_DECL(add_eax_imm32_handler), //0x05
   HANDLER_DECL(push_r32_handler), //0x06
   HANDLER_DECL(undefined_opcode_handler), //0x07
   HANDLER_DECL(undefined_opcode_handler), //0x08
@@ -50,8 +65,8 @@ int (FASTCALL * opcode_dispatch_table[256]) (ThreadContext_t *, VirtualDirectory
   HANDLER_DECL(addsubcmp_rm32_r32_handler), //0x29
   HANDLER_DECL(addsubcmp_r8_rm8_handler), //0x2A
   HANDLER_DECL(addsubcmp_r32_rm32_handler), //0x2B
-  HANDLER_DECL(addsubcmp_al_imm8_handler), //0x2C
-  HANDLER_DECL(addsubcmp_eax_imm32_handler), //0x2D
+  HANDLER_DECL(sub_al_imm8_handler), //0x2C
+  HANDLER_DECL(sub_eax_imm32_handler), //0x2D
   HANDLER_DECL(prefix_handler), //0x2E
   HANDLER_DECL(undefined_opcode_handler), //0x2F
   HANDLER_DECL(undefined_opcode_handler), //0x30
@@ -66,8 +81,8 @@ int (FASTCALL * opcode_dispatch_table[256]) (ThreadContext_t *, VirtualDirectory
   HANDLER_DECL(addsubcmp_rm32_r32_handler), //0x39
   HANDLER_DECL(addsubcmp_r8_rm8_handler), //0x3A
   HANDLER_DECL(addsubcmp_r32_rm32_handler), //0x3B
-  HANDLER_DECL(addsubcmp_al_imm8_handler), //0x3C
-  HANDLER_DECL(addsubcmp_eax_imm32_handler), //0x3D
+  HANDLER_DECL(cmp_al_imm8_handler), //0x3C
+  HANDLER_DECL(cmp_eax_imm32_handler), //0x3D
   HANDLER_DECL(prefix_handler), //0x3E
   HANDLER_DECL(undefined_opcode_handler), //0x3F
   HANDLER_DECL(undefined_opcode_handler), //0x40
@@ -276,7 +291,7 @@ static void *opcode_with_prefix_dispatch_table[256] =
     HANDLER_DECL(undefined_opcode_handler), //0x02
     HANDLER_DECL(addsubcmp_r1632_rm1632_handler), //0x03
     HANDLER_DECL(undefined_opcode_handler), //0x04
-    HANDLER_DECL(addsubcmp_ar1632_imm1632_handler), //0x05
+    HANDLER_DECL(add_ar1632_imm1632_handler), //0x05
     HANDLER_DECL(push_r1632_handler), //0x06
     HANDLER_DECL(undefined_opcode_handler), //0x07
     HANDLER_DECL(undefined_opcode_handler), //0x08
@@ -316,7 +331,7 @@ static void *opcode_with_prefix_dispatch_table[256] =
     HANDLER_DECL(undefined_opcode_handler), //0x2A
     HANDLER_DECL(addsubcmp_r1632_rm1632_handler), //0x2B
     HANDLER_DECL(undefined_opcode_handler), //0x2C
-    HANDLER_DECL(addsubcmp_ar1632_imm1632_handler), //0x2D
+    HANDLER_DECL(sub_ar1632_imm1632_handler), //0x2D
     HANDLER_DECL(prefix_handler), //0x2E
     HANDLER_DECL(undefined_opcode_handler), //0x2F
     HANDLER_DECL(undefined_opcode_handler), //0x30
@@ -332,7 +347,7 @@ static void *opcode_with_prefix_dispatch_table[256] =
     HANDLER_DECL(undefined_opcode_handler), //0x3A
     HANDLER_DECL(addsubcmp_r1632_rm1632_handler), //0x3B
     HANDLER_DECL(undefined_opcode_handler), //0x3C
-    HANDLER_DECL(addsubcmp_ar1632_imm1632_handler), //0x3D
+    HANDLER_DECL(cmp_ar1632_imm1632_handler), //0x3D
     HANDLER_DECL(prefix_handler), //0x3E
     HANDLER_DECL(undefined_opcode_handler), //0x3F
     HANDLER_DECL(undefined_opcode_handler), //0x40

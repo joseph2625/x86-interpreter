@@ -32,48 +32,7 @@
 
 
 
-#ifdef _WIN32
-#define FORCEINLINE __forceinline
-#define FASTCALL __fastcall
-#define HANDLER_DECL(name) name
-#define HANDLER_DEF_BEGIN(name) __declspec( naked ) int FASTCALL name( ThreadContext_t * const context , VirtualDirectoryLookupTable_t * const table) { \
-  __asm { \
-  __asm push ebp \
-  __asm push ebx \
-  __asm push esi \
-  __asm push edi \
-  __asm mov ebp, esp \
-  __asm sub esp, __LOCAL_SIZE \
-  __asm mov context, ecx \
-  __asm mov table, edx \
-}
 
-#define HANDLER_DEF_END { dump_thread_context( context, table );}__asm { \
-  __asm lea eax, opcode_dispatch_table \
-  __asm mov ecx, context \
-  __asm mov edx, table \
-  __asm lea ebx, [ecx]context.code \
-  __asm mov ebx, [ebx] \
-  __asm movzx ebx, byte ptr[ebx] \
-  __asm lea eax, [eax+ebx*4] \
-  __asm mov eax, [eax] \
-  __asm mov esp, ebp \
-  __asm pop edi \
-  __asm pop esi \
-  __asm pop ebx\
-  __asm pop ebp \
-  __asm jmp eax \
-  } \
-}
-
-
-#else
-#define FASTCALL __attribute__((fastcall))
-#define FORCEINLINE __attribute__((always_inline))
-#define HANDLER_DECL(name) &&name
-#define HANDLER_DEF_BEGIN(name) name:
-#define HANDLER_DEF_END goto *opcode_dispatch_table[Context->code[0]];
-#endif
 
 #define GETEXTOPCODE(modrm) ( ( modrm >> 3 ) & 0x7 )
 #define GETREGNUM(modrm) GETEXTOPCODE(modrm)
@@ -175,6 +134,32 @@ inline uint32_t get_prefixes( unsigned char **code, uint32_t *eip ) {
     (*code)++;
   } while( true );
 }
+
+#define CHECKCFADDITION if( k < i ) SETCF(eflags); else UNSETCF(eflags);
+#define CHECKCFSUBTRACTION if( k > i ) SETCF(eflags); else UNSETCF(eflags);
+
+#define CHECKOF32BITADDITION if( ((i ^ j) & 0x80000000) != 0 ) UNSETOF(eflags); else if( (i ^ k) & 0x80000000 ) SETOF(eflags); else UNSETOF(eflags);
+#define CHECKOF16BITADDITION if( ((i ^ j) & 0x8000) != 0 ) UNSETOF(eflags); else if( (i ^ k) & 0x8000 ) SETOF(eflags); else UNSETOF(eflags);
+#define CHECKOF8BITADDITION if( ((i ^ j) & 0x80) != 0 ) UNSETOF(eflags); else if( (i ^ k) & 0x80 ) SETOF(eflags); else UNSETOF(eflags);
+
+
+
+#define CHECKOF32BITSUBTRACTION if( ((i ^ j) & 0x80000000) == 0 ) UNSETOF(eflags); else if( (i ^ k) & 0x80000000 ) SETOF(eflags); else UNSETOF(eflags);
+#define CHECKOF16BITSUBTRACTION if( ((i ^ j) & 0x8000) == 0 ) UNSETOF(eflags); else if( (i ^ k) & 0x8000 ) SETOF(eflags); else UNSETOF(eflags);
+#define CHECKOF8BITSUBTRACTION if( ((i ^ j) & 0x80) == 0 ) UNSETOF(eflags); else if( (i ^ k) & 0x80 ) SETOF(eflags); else UNSETOF(eflags);
+
+
+#define CHECKSF32BIT if( (k & 0x80000000) > 0 ) SETSF(eflags); else UNSETSF(eflags);
+#define CHECKSF16BIT if( (k & 0x8000) > 0 ) SETSF(eflags); else UNSETSF(eflags);
+#define CHECKSF8BIT if( (k & 0x80) > 0 ) SETSF(eflags); else UNSETSF(eflags);
+
+#define CHECKZF if( k == 0 ) SETZF(eflags); else UNSETZF(eflags);
+
+#define CHECKPF if( !parity_table[k & 0xFF] ) SETPF(eflags); else UNSETPF(eflags);
+
+#define CHECKAFADDITION if( ( (i & 0xF) + (j & 0xF) ) > 15 ) SETAF(eflags); else UNSETAF(eflags); 
+
+#define CHECKAFSUBTRACTION if( ( (int8_t)(i & 0xF) - (int8_t)(j & 0xF) ) < 0 ) SETAF(eflags); else UNSETAF(eflags);
 
 inline uint32_t perform_32bit_arithmetic( const uint32_t i, const uint32_t j, uint32_t * dest, uint32_t *const context_eflags, const bool is_addition ){
   uint32_t eflags = *context_eflags;
@@ -278,7 +263,7 @@ inline uint16_t perform_16bit_arithmetic( uint32_t i, uint32_t j, uint16_t *dest
     else
       UNSETAF(eflags);
   }
-  
+
 
   *context_eflags = eflags;
   *dest = k;
@@ -335,6 +320,7 @@ inline uint32_t perform_8bit_arithmetic( uint32_t i, uint32_t j, uint8_t *dest, 
   *dest = k;
   return k & 0xFF;
 }
+
 inline void print_access_violation( const uint32_t virtual_address, const unsigned int requested_access ) {
   char *access_string;
   switch( requested_access ) {
@@ -483,9 +469,10 @@ inline void *get_rm( unsigned char *modrm_pointer, uint32_t *const registers, ui
 
   return dest;
 }
+//REQUIRE SEPARATE FUNCTION DUE TO DIFFERENT REGISTER ACCESS MODE IN 8BIT (FOR AL/AH; EBP,ESP,EDI,ESI ARE NOT 8BIT ACCESSIBLE)
 inline uint8_t *get_rm8( unsigned char *modrm_pointer, uint32_t *const registers, uint32_t *displacement, VirtualDirectoryLookupTable_t *table ){
   uint8_t *dest;
-  if( GETMOD(modrm_pointer[0]) == 3 ) {
+  if( GETMOD(modrm_pointer[0]) == 3 ) { 
     switch(GETRM(modrm_pointer[0])){
     case 0:
     case 1:

@@ -2,6 +2,10 @@
 #include "interpreter.h"
 #endif
 
+HANDLER_DEF_AR1632_IMM1632( add );
+HANDLER_DEF_AR1632_IMM1632( sub );
+HANDLER_DEF_AR1632_IMM1632( cmp );
+/*
 HANDLER_DEF_BEGIN(addsubcmp_ar1632_imm1632_handler) {
   uint32_t prefixes = get_prefixes( &context->code, &context->eip);
   uint32_t dummy;
@@ -18,7 +22,11 @@ HANDLER_DEF_BEGIN(addsubcmp_ar1632_imm1632_handler) {
   }
 }
 HANDLER_DEF_END
-
+*/
+HANDLER_DEF_AL_IMM8( add );
+HANDLER_DEF_AL_IMM8( sub );
+HANDLER_DEF_AL_IMM8( cmp );
+/*
 HANDLER_DEF_BEGIN(addsubcmp_al_imm8_handler) {
 
   uint8_t dummy;
@@ -29,7 +37,11 @@ HANDLER_DEF_BEGIN(addsubcmp_al_imm8_handler) {
   context->eip+=2;
 }
 HANDLER_DEF_END
-
+*/
+HANDLER_DEF_EAX_IMM32( add );
+HANDLER_DEF_EAX_IMM32( sub );
+HANDLER_DEF_EAX_IMM32( cmp );
+/*
   HANDLER_DEF_BEGIN(addsubcmp_eax_imm32_handler) {
     uint32_t dummy;
     assert( context->code[0] == 0x05 || context->code[0] == 0x2D || context->code[0] == 0x3D );
@@ -38,7 +50,20 @@ HANDLER_DEF_END
     context->eip+=5;
 }
 HANDLER_DEF_END
+*/
+/*
+__declspec( naked ) int __fastcall add_rm8_imm8_handler( ThreadContext_t * const context , VirtualDirectoryLookupTable_t * const table) { __asm { __asm push ebp __asm push ebx __asm push esi __asm push edi __asm mov ebp, esp __asm sub esp, __LOCAL_SIZE __asm mov context, ecx __asm mov table, edx } { uint32_t displacement = 0; void *rm_field = get_rm8( &context->code[1], context->general_purpose_registers, &displacement, table); 
+perform_8bit_add( *rm_field, context->code[1+displacement], (uint8_t *)rm_field, &context->eflags ); context->code+= 2 + displacement; context->eip+= 2 + displacement; } { dump_thread_context( context, table );}__asm { __asm lea eax, opcode_dispatch_table __asm mov ecx, context __asm mov edx, table __asm lea ebx, [ecx]context.code __asm mov ebx, [ebx] __asm movzx ebx, byte ptr[ebx] __asm lea eax, [eax+ebx*4] __asm mov eax, [eax] __asm mov esp, ebp __asm pop edi __asm pop esi __asm pop ebx __asm pop ebp __asm jmp eax } };
+*/
 
+
+HANDLER_DEF_RM8_IMM8( add );
+HANDLER_DEF_RM8_IMM8( sub );
+HANDLER_DEF_RM8_IMM8( cmp );
+
+HANDLER_EXTOPCODE_DISPATCH( addsubcmp, rm8, imm8 );
+
+/*
   HANDLER_DEF_BEGIN(addsubcmp_rm8_imm8_handler) {
     assert( context->code[0] == 0x80 );
 
@@ -64,7 +89,7 @@ HANDLER_DEF_END
     }
 }
 HANDLER_DEF_END
-
+*/
   HANDLER_DEF_BEGIN(addsubcmp_rm8_r8_handler) {
     assert( context->code[0] == 0x00 || context->code[0] == 0x28 || context->code[0] == 0x38 );
 
