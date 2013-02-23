@@ -53,7 +53,7 @@ int main( int argc, char *argv[] ) {
     if( !update_runtime_environment( &environment ))
       break;
   }
-  fprintf( stderr, "All threads terminated. Exiting...\n" );
+  fprintf( stderr, "INFO: All threads terminated. Exiting...\n" );
   return 0;
 err_no_level:
   fprintf( stderr, "ERROR: Missing/Invalid verbosity level\n" );

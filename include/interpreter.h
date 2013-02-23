@@ -115,6 +115,14 @@ int FASTCALL mov_moffs8_al_handler( ThreadContext_t *const, VirtualDirectoryLook
 int FASTCALL mov_ar_moffs1632_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
 int FASTCALL mov_moffs1632_ar_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
 
+int FASTCALL movsx_r1632_rm8_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL movsx_r32_rm8_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL movsx_r32_rm16_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+
+int FASTCALL movzx_r1632_rm8_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL movzx_r32_rm8_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL movzx_r32_rm16_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+
 int FASTCALL lea_r32_rm32_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
 int FASTCALL leave32_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
 int FASTCALL interrupt_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );

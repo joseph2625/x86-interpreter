@@ -127,9 +127,25 @@ inline uint32_t perform_32bit_mov( const uint32_t, const uint32_t j, uint32_t * 
   return j;
 }
 
+inline uint32_t perform_32bit_movsx( const uint32_t i, const uint32_t j, uint32_t * dest, uint32_t *const context_eflags){
+  return perform_32bit_mov( i, j, dest, context_eflags );
+}
+
+inline uint32_t perform_32bit_movzx( const uint32_t i, const uint32_t j, uint32_t * dest, uint32_t *const context_eflags){
+  return perform_32bit_mov( i, j, dest, context_eflags );
+}
+
 inline uint16_t perform_16bit_mov( const uint32_t, const uint32_t j, uint16_t * dest, uint32_t *const ){
   *dest = j;
   return j;
+}
+
+inline uint16_t perform_16bit_movsx( const uint32_t i, const uint32_t j, uint16_t * dest, uint32_t *const context_eflags){
+  return perform_16bit_mov( i, j, dest, context_eflags);
+}
+
+inline uint16_t perform_16bit_movzx( const uint32_t i, const uint32_t j, uint16_t * dest, uint32_t *const context_eflags){
+  return perform_16bit_mov( i, j, dest, context_eflags);
 }
 
 inline uint8_t perform_8bit_mov( const uint32_t, const uint32_t j, uint8_t * dest, uint32_t *const ){

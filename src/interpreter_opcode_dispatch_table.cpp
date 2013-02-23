@@ -783,16 +783,16 @@ static void *opcode_with_escape_sequence_dispatch_table[256] =
     HANDLER_DECL(undefined_opcode_handler), //0xB3
     HANDLER_DECL(undefined_opcode_handler), //0xB4
     HANDLER_DECL(undefined_opcode_handler), //0xB5
-    HANDLER_DECL(undefined_opcode_handler), //0xB6
-    HANDLER_DECL(undefined_opcode_handler), //0xB7
+    HANDLER_DECL(movzx_r32_rm8_handler), //0xB6
+    HANDLER_DECL(movzx_r32_rm16_handler), //0xB7
     HANDLER_DECL(undefined_opcode_handler), //0xB8
     HANDLER_DECL(undefined_opcode_handler), //0xB9
     HANDLER_DECL(undefined_opcode_handler), //0xBA
     HANDLER_DECL(undefined_opcode_handler), //0xBB
     HANDLER_DECL(undefined_opcode_handler), //0xBC
     HANDLER_DECL(undefined_opcode_handler), //0xBD
-    HANDLER_DECL(undefined_opcode_handler), //0xBE
-    HANDLER_DECL(undefined_opcode_handler), //0xBF
+    HANDLER_DECL(movsx_r32_rm8_handler), //0xBE
+    HANDLER_DECL(movsx_r32_rm16_handler), //0xBF
     HANDLER_DECL(undefined_opcode_handler), //0xC0
     HANDLER_DECL(undefined_opcode_handler), //0xC1
     HANDLER_DECL(undefined_opcode_handler), //0xC2
@@ -1048,7 +1048,7 @@ static void *opcode_with_prefix_and_escape_sequence_dispatch_table[256] =
     HANDLER_DECL(undefined_opcode_handler), //0xB3
     HANDLER_DECL(undefined_opcode_handler), //0xB4
     HANDLER_DECL(undefined_opcode_handler), //0xB5
-    HANDLER_DECL(undefined_opcode_handler), //0xB6
+    HANDLER_DECL(movzx_r1632_rm8_handler), //0xB6
     HANDLER_DECL(undefined_opcode_handler), //0xB7
     HANDLER_DECL(undefined_opcode_handler), //0xB8
     HANDLER_DECL(undefined_opcode_handler), //0xB9
@@ -1056,7 +1056,7 @@ static void *opcode_with_prefix_and_escape_sequence_dispatch_table[256] =
     HANDLER_DECL(undefined_opcode_handler), //0xBB
     HANDLER_DECL(undefined_opcode_handler), //0xBC
     HANDLER_DECL(undefined_opcode_handler), //0xBD
-    HANDLER_DECL(undefined_opcode_handler), //0xBE
+    HANDLER_DECL(movsx_r1632_rm8_handler), //0xBE
     HANDLER_DECL(undefined_opcode_handler), //0xBF
     HANDLER_DECL(undefined_opcode_handler), //0xC0
     HANDLER_DECL(undefined_opcode_handler), //0xC1

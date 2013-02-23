@@ -168,4 +168,17 @@
 #define HANDLER_DEF_R8_RM8( cmd ) HANDLER_DEF (cmd, 8, r8, rm8, get_rm8( &context->code[1], context->general_purpose_registers, &displacement, table), GETREG8BIT(context, GETREGNUM(context->code[1])), *rm_field, &GETREG8BIT(context, GETREGNUM(context->code[1])), 1)
 #define HANDLER_DEF_R1632_RM1632( cmd ) HANDLER_WITH_PREFIX_DEF (cmd, r1632, rm1632, get_rm( &context->code[1], context->general_purpose_registers, &displacement, table), GETREG(context, GETREGNUM(context->code[1])), *rm_field, &GETREG(context, GETREGNUM(context->code[1])), 1, 1 )
 #define HANDLER_DEF_R32_RM32( cmd ) HANDLER_DEF (cmd, 32, r32, rm32, get_rm( &context->code[1], context->general_purpose_registers, &displacement, table), GETREG(context, GETREGNUM(context->code[1])), *rm_field, &GETREG(context, GETREGNUM(context->code[1])), 1)
+
+#define HANDLER_DEF_R8_IMM8( cmd, base_opcode ) HANDLER_DEF (cmd, 8, r8, imm8, NULL, GETREG8BIT(context, context->code[0] - base_opcode), context->code[1], &GETREG8BIT(context, context->code[0] - base_opcode), 2 )
+#define HANDLER_DEF_R1632_IMM1632( cmd, base_opcode ) HANDLER_WITH_PREFIX_DEF (cmd, r1632, imm1632, NULL, GETREG(context, context->code[0] - base_opcode), context->code[1], &GETREG(context, context->code[0] - base_opcode), 5, 3 )
+#define HANDLER_DEF_R32_IMM32( cmd, base_opcode ) HANDLER_DEF (cmd, 32, r32, imm32, NULL, GETREG(context, context->code[0] - base_opcode), context->code[1], &GETREG(context, context->code[0] - base_opcode), 5 )
+
+#define HANDLER_DEF_R1632_RM8_SIGN_EXT_WITH_ESCAPE_SEQUENCE( cmd ) HANDLER_WITH_PREFIX_SIGN_EXT_DEF( cmd, r1632, rm8, get_rm8( &context->code[2], context->general_purpose_registers, &displacement, table), GETREG(context, GETREGNUM(context->code[2])), (int8_t)(*rm_field), &GETREG(context, GETREGNUM(context->code[2])), 2, 2)
+#define HANDLER_DEF_R32_RM8_SIGN_EXT_WITH_ESCAPE_SEQUENCE( cmd ) HANDLER_SIGN_EXT_DEF( cmd, 32, r32, rm8, get_rm8( &context->code[2], context->general_purpose_registers, &displacement, table), GETREG(context, GETREGNUM(context->code[2])), (int8_t)(*rm_field), &GETREG(context, GETREGNUM(context->code[2])), 2)
+#define HANDLER_DEF_R32_RM16_SIGN_EXT_WITH_ESCAPE_SEQUENCE( cmd ) HANDLER_SIGN_EXT_DEF( cmd, 32, r32, rm16, get_rm( &context->code[2], context->general_purpose_registers, &displacement, table), GETREG(context, GETREGNUM(context->code[2])), (int16_t)(*((uint16_t *)rm_field)), &GETREG(context, GETREGNUM(context->code[2])), 2 )
+
+#define HANDLER_DEF_R1632_RM8_WITH_ESCAPE_SEQUENCE( cmd ) HANDLER_WITH_PREFIX_DEF( cmd, r1632, rm8, get_rm8( &context->code[2], context->general_purpose_registers, &displacement, table), GETREG(context, GETREGNUM(context->code[2])), *rm_field, &GETREG(context, GETREGNUM(context->code[2])), 2, 2)
+#define HANDLER_DEF_R32_RM8_WITH_ESCAPE_SEQUENCE( cmd ) HANDLER_DEF( cmd, 32, r32, rm8, get_rm8( &context->code[2], context->general_purpose_registers, &displacement, table), GETREG(context, GETREGNUM(context->code[2])), *rm_field, &GETREG(context, GETREGNUM(context->code[2])), 2)
+#define HANDLER_DEF_R32_RM16_WITH_ESCAPE_SEQUENCE( cmd ) HANDLER_SIGN_EXT_DEF( cmd, 32, r32, rm16, get_rm( &context->code[2], context->general_purpose_registers, &displacement, table), GETREG(context, GETREGNUM(context->code[2])), *((uint16_t *)rm_field), &GETREG(context, GETREGNUM(context->code[2])), 2 )
+
 #endif //X86INTERPRETER_INTERPRETER_MACRO_EXPANSION_H

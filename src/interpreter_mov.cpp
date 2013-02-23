@@ -2,6 +2,8 @@
 #include "interpreter.h"
 #endif
 
+HANDLER_DEF_RM8_R8( mov );
+/*
 HANDLER_DEF_BEGIN(mov_rm8_r8_handler) {
   assert( context->code[0] == 0x88 );
 
@@ -15,7 +17,9 @@ HANDLER_DEF_BEGIN(mov_rm8_r8_handler) {
   context->code += displacement+1;
 }
 HANDLER_DEF_END
-
+*/
+HANDLER_DEF_RM1632_R1632( mov );
+/*
 HANDLER_DEF_BEGIN(mov_rm1632_r1632_handler){
   uint32_t prefixes = get_prefixes( &context->code, &context->eip);
   assert( context->code[0] == 0x89 );
@@ -34,7 +38,9 @@ HANDLER_DEF_BEGIN(mov_rm1632_r1632_handler){
   context->eip +=displacement+1;
   context->code += displacement+1;
 }
-HANDLER_DEF_END
+HANDLER_DEF_END */
+HANDLER_DEF_RM32_R32( mov );
+/*
 HANDLER_DEF_BEGIN(mov_rm32_r32_handler) {
   assert( context->code[0] == 0x89 );
 
@@ -47,8 +53,10 @@ HANDLER_DEF_BEGIN(mov_rm32_r32_handler) {
   context->code += displacement+1;
 }
 
-HANDLER_DEF_END
+HANDLER_DEF_END*/
 
+HANDLER_DEF_R8_RM8( mov );
+/*
 HANDLER_DEF_BEGIN(mov_r8_rm8_handler) {
 
   assert( context->code[0] == 0x8A );
@@ -74,7 +82,9 @@ HANDLER_DEF_BEGIN(mov_r8_rm8_handler) {
   context->code += displacement+1;
 }
 HANDLER_DEF_END
-
+*/
+HANDLER_DEF_R1632_RM1632( mov );
+/*
 HANDLER_DEF_BEGIN(mov_r1632_rm1632_handler) {
 
   uint32_t prefixes = get_prefixes( &context->code, &context->eip);
@@ -95,6 +105,9 @@ HANDLER_DEF_BEGIN(mov_r1632_rm1632_handler) {
   context->code += displacement+1;
 }
 HANDLER_DEF_END
+*/
+HANDLER_DEF_R32_RM32( mov ); //uses extended opcode, but there's only one mapping
+/*
 HANDLER_DEF_BEGIN(mov_r32_rm32_handler) {
   assert( context->code[0] == 0x8B );
 
@@ -107,76 +120,10 @@ HANDLER_DEF_BEGIN(mov_r32_rm32_handler) {
   context->eip +=displacement+1;
   context->code += displacement+1;
 }
-HANDLER_DEF_END
-HANDLER_DEF_BEGIN(mov_rm16_sreg_handler) {
-  uint32_t prefixes = get_prefixes( &context->code, &context->eip);
-  assert( context->code[0] == 0x8C || context->code[0] == 0x8E);
+HANDLER_DEF_END*/
 
-  uint32_t displacement = INT32_MAX;
-  uint16_t *srcdest;
-
-  srcdest = (uint16_t *)get_rm( &context->code[1], context->general_purpose_registers, &displacement, table);
-  if( GETREGNUM(context->code[1]) > 5 ){
-    fprintf( stderr, "ERROR: Invalid segment register\n" );
-    assert(0);
-  }
-  if( context->code[0] == 0x8C )
-    *srcdest = context->segment_registers[GETREGNUM(context->code[1])];
-  else
-    context->segment_registers[GETREGNUM(context->code[1])] = *srcdest;
-
-  context->eip +=displacement+1;
-  context->code += displacement+1;
-}
-HANDLER_DEF_END
-
-HANDLER_DEF_BEGIN(mov_r8_imm8_handler) {
-  assert( context->code[0] >= 0xB0 || context->code[0] <= 0xB7 );
-
-  switch( context->code[0] ) {
-  case 0xB0:
-  case 0xB1:
-  case 0xB2:
-  case 0xB3:
-    *((uint8_t *)(&GETREG(context, context->code[0] - 0xB0 ))) = context->code[1];
-    break;
-  case 0xB4:
-  case 0xB5:
-  case 0xB6:
-  case 0xB7:
-    *(((uint8_t *)(&GETREG(context, context->code[0] - 0xB0 )))+1) = context->code[1];
-    break;
-  }
-  context->code+=2;
-  context->eip+=2;
-}
-HANDLER_DEF_END
-
-HANDLER_DEF_BEGIN(mov_r1632_imm1632_handler) {
-  uint32_t prefixes = get_prefixes( &context->code, &context->eip );
-  assert( context->code[0] >= 0xB8 || context->code[0] <= 0xBF );
-
-  if( prefixes & PREFIX_OPERAND_SIZE_OVERRIDE ) {
-    *((uint16_t *)(&GETREG(context, context->code[0] - 0xB8 ))) = *((uint16_t *)(&context->code[1]));
-    context->code+=3;
-    context->eip+=3;
-  } else {
-    GETREG(context, context->code[0] - 0xB8 ) = *((uint32_t *)(&context->code[1]));
-    context->code+=5;
-    context->eip+=5;
-  }
-}
-HANDLER_DEF_END
-HANDLER_DEF_BEGIN(mov_r32_imm32_handler) {
-  assert( context->code[0] >= 0xB8 || context->code[0] <= 0xBF );
-
-  GETREG(context, context->code[0] - 0xB8 ) = *((uint32_t *)(&context->code[1]));
-
-  context->code+=5;
-  context->eip+=5;
-}
-HANDLER_DEF_END
-
+HANDLER_DEF_RM8_IMM8( mov ); //uses extended opcode, but there's only one mapping
+/*
 HANDLER_DEF_BEGIN(mov_rm8_imm8_handler) {
   assert( context->code[0] == 0xC6 );
 
@@ -198,8 +145,10 @@ HANDLER_DEF_BEGIN(mov_rm8_imm8_handler) {
     break;
   }
 }
-HANDLER_DEF_END
+HANDLER_DEF_END*/
 
+HANDLER_DEF_RM1632_IMM1632( mov ); //uses extended opcode, but there's only one mapping
+/*
 HANDLER_DEF_BEGIN(mov_rm1632_imm1632_handler) {
   uint32_t prefixes = get_prefixes( &context->code, &context->eip);
   assert( context->code[0] == 0xC7);
@@ -230,8 +179,12 @@ HANDLER_DEF_BEGIN(mov_rm1632_imm1632_handler) {
   }
 }
 HANDLER_DEF_END
+*/
+
+HANDLER_DEF_RM32_IMM32( mov ); //uses extended opcode, but there's only one mapping
+/*
 HANDLER_DEF_BEGIN(mov_rm32_imm32_handler) {
-  assert( context->code[0] == 0x81 );
+  assert( context->code[0] == 0xC7 );
 
   uint32_t displacement = INT32_MAX;
   uint32_t *dest;
@@ -252,20 +205,82 @@ HANDLER_DEF_BEGIN(mov_rm32_imm32_handler) {
   }
 }
 HANDLER_DEF_END
+*/
+
+HANDLER_DEF_R8_IMM8( mov, 0xB0 );
+/*
+  HANDLER_DEF_BEGIN(mov_r8_imm8_handler) {
+    assert( context->code[0] >= 0xB0 || context->code[0] <= 0xB7 );
+
+    switch( context->code[0] ) {
+    case 0xB0:
+    case 0xB1:
+    case 0xB2:
+    case 0xB3:
+      *((uint8_t *)(&GETREG(context, context->code[0] - 0xB0 ))) = context->code[1];
+      break;
+    case 0xB4:
+    case 0xB5:
+    case 0xB6:
+    case 0xB7:
+      *(((uint8_t *)(&GETREG(context, context->code[0] - 0xB0 )))+1) = context->code[1];
+      break;
+    }
+    context->code+=2;
+    context->eip+=2;
+}
+HANDLER_DEF_END
+*/
+
+HANDLER_DEF_R1632_IMM1632( mov, 0xB8 );
+/*
+  HANDLER_DEF_BEGIN(mov_r1632_imm1632_handler) {
+    uint32_t prefixes = get_prefixes( &context->code, &context->eip );
+    assert( context->code[0] >= 0xB8 || context->code[0] <= 0xBF );
+
+    if( prefixes & PREFIX_OPERAND_SIZE_OVERRIDE ) {
+      *((uint16_t *)(&GETREG(context, context->code[0] - 0xB8 ))) = *((uint16_t *)(&context->code[1]));
+      context->code+=3;
+      context->eip+=3;
+    } else {
+      GETREG(context, context->code[0] - 0xB8 ) = *((uint32_t *)(&context->code[1]));
+      context->code+=5;
+      context->eip+=5;
+    }
+}
+HANDLER_DEF_END
+*/
+HANDLER_DEF_R32_IMM32( mov, 0xB8 );
+/*
+  HANDLER_DEF_BEGIN(mov_r32_imm32_handler) {
+    assert( context->code[0] >= 0xB8 || context->code[0] <= 0xBF );
+
+    GETREG(context, context->code[0] - 0xB8 ) = *((uint32_t *)(&context->code[1]));
+
+    context->code+=5;
+    context->eip+=5;
+}
+HANDLER_DEF_END
+*/
 
 HANDLER_DEF_BEGIN(mov_al_moffs8_handler) {
   uint32_t prefixes = get_prefixes( &context->code, &context->eip );
   assert( context->code[0] == 0xA0 );
 
   uint8_t *to_move;
-  if( prefixes & PREFIX_ADDRESS_SIZE_OVERRIDE )
+  if( prefixes & PREFIX_ADDRESS_SIZE_OVERRIDE ) {
     to_move = get_real_address( *((uint16_t *)(&context->code[1])), table, READ );
-  else
+    context->eip +=3;
+    context->code +=3;
+  }
+  else {
     to_move = get_real_address( *((uint32_t *)(&context->code[1])), table, READ );
+    context->eip +=5;
+    context->code +=5;
+  }
 
   (*(uint8_t *)(&context->eax)) = *to_move;
-  context->eip +=2;
-  context->code +=2;
+  
 }
 HANDLER_DEF_END
 
@@ -328,3 +343,34 @@ HANDLER_DEF_BEGIN(mov_moffs1632_ar_handler) {
   }
 }
 HANDLER_DEF_END
+
+  HANDLER_DEF_BEGIN(mov_rm16_sreg_handler) {
+    uint32_t prefixes = get_prefixes( &context->code, &context->eip);
+    assert( context->code[0] == 0x8C || context->code[0] == 0x8E);
+
+    uint32_t displacement = INT32_MAX;
+    uint16_t *srcdest;
+
+    srcdest = (uint16_t *)get_rm( &context->code[1], context->general_purpose_registers, &displacement, table);
+    if( GETREGNUM(context->code[1]) > 5 ){
+      fprintf( stderr, "ERROR: Invalid segment register\n" );
+      assert(0);
+    }
+    if( context->code[0] == 0x8C )
+      *srcdest = context->segment_registers[GETREGNUM(context->code[1])];
+    else
+      context->segment_registers[GETREGNUM(context->code[1])] = *srcdest;
+
+    context->eip +=displacement+1;
+    context->code += displacement+1;
+}
+HANDLER_DEF_END
+
+HANDLER_DEF_R1632_RM8_SIGN_EXT_WITH_ESCAPE_SEQUENCE( movsx );
+HANDLER_DEF_R32_RM8_SIGN_EXT_WITH_ESCAPE_SEQUENCE( movsx );
+HANDLER_DEF_R32_RM16_SIGN_EXT_WITH_ESCAPE_SEQUENCE( movsx );
+
+HANDLER_DEF_R1632_RM8_WITH_ESCAPE_SEQUENCE( movzx );
+HANDLER_DEF_R32_RM8_WITH_ESCAPE_SEQUENCE( movzx );
+HANDLER_DEF_R32_RM16_WITH_ESCAPE_SEQUENCE( movzx );
+
