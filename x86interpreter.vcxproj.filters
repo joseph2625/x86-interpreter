@@ -70,10 +70,10 @@
     <ClInclude Include="include\interpreter_util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\interpreter_util_addsubcmp.h">
+    <ClInclude Include="include\interpreter_macro_expansion.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\interpreter_macro_expansion.h">
+    <ClInclude Include="include\interpreter_util_instructions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -48,6 +48,7 @@ typedef struct ThreadContext {
   
 
   union {
+    uint8_t register_field[32];
     uint32_t general_purpose_registers[8];
     struct {
       uint32_t eax;

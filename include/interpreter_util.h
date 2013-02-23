@@ -38,6 +38,7 @@
 #define GETREGNUM(modrm) GETEXTOPCODE(modrm)
 #define GETRM(modrm) ( modrm & 0x7 )
 #define GETREG(context, regnum) (context)->general_purpose_registers[regnum]
+#define GETREG8BIT(context, regnum) (( regnum < 4 ) ? (context)->register_field[regnum*4] : (context)->register_field[(regnum-4)*4+1] )
 #define GETMOD(modrm) ( modrm >> 6 )
 #define GETSS(sib) ( sib >> 6 )
 #define GETSIBINDEX(sib) ( ( sib >> 3 ) & 0x7 )
@@ -153,7 +154,9 @@ inline uint32_t get_prefixes( unsigned char **code, uint32_t *eip ) {
 #define CHECKSF16BIT if( (k & 0x8000) > 0 ) SETSF(eflags); else UNSETSF(eflags);
 #define CHECKSF8BIT if( (k & 0x80) > 0 ) SETSF(eflags); else UNSETSF(eflags);
 
-#define CHECKZF if( k == 0 ) SETZF(eflags); else UNSETZF(eflags);
+#define CHECKZF32BIT if( k == 0 ) SETZF(eflags); else UNSETZF(eflags);
+#define CHECKZF16BIT if( (k & 0xFFFF) == 0 ) SETZF(eflags); else UNSETZF(eflags);
+#define CHECKZF8BIT if( (k & 0xFF ) == 0 ) SETZF(eflags); else UNSETZF(eflags);
 
 #define CHECKPF if( !parity_table[k & 0xFF] ) SETPF(eflags); else UNSETPF(eflags);
 

@@ -30,7 +30,7 @@
     <ClInclude Include="include\interpreter.h" />
     <ClInclude Include="include\interpreter_macro_expansion.h" />
     <ClInclude Include="include\interpreter_util.h" />
-    <ClInclude Include="include\interpreter_util_addsubcmp.h" />
+    <ClInclude Include="include\interpreter_util_instructions.h" />
     <ClInclude Include="include\pe.h" />
     <ClInclude Include="include\runtime.h" />
   </ItemGroup>
