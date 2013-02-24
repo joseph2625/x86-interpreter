@@ -344,7 +344,7 @@ inline void print_access_violation( const uint32_t virtual_address, const unsign
     break;
   }
 
-  fprintf( stderr, "ERROR: Access violation while %s [%08X]", access_string, virtual_address );
+  fprintf( stderr, "ERROR: Access violation while %s [%08X]\n", access_string, virtual_address );
   assert(0);
 }
 
