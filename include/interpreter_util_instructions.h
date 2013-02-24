@@ -122,6 +122,42 @@ inline void perform_8bit_cmp( const uint32_t i, const uint32_t j, uint8_t *, uin
   *context_eflags = eflags;
 }
 
+inline void perform_32bit_test( const uint32_t i, const uint32_t j, uint32_t *, uint32_t *const context_eflags ){
+  uint32_t eflags = *context_eflags;
+  uint32_t k = i & j;
+
+  UNSETOF(eflags);
+  UNSETCF(eflags);
+  CHECKSF32BIT;
+  CHECKZF32BIT;
+  CHECKPF;
+  *context_eflags = eflags;
+}
+
+inline void perform_16bit_test( const uint32_t i, const uint32_t j, uint16_t *, uint32_t *const context_eflags ){
+  uint32_t eflags = *context_eflags;
+  uint32_t k = i & j;
+
+  UNSETOF(eflags);
+  UNSETCF(eflags);
+  CHECKSF16BIT;
+  CHECKZF16BIT;
+  CHECKPF;
+  *context_eflags = eflags;
+}
+
+inline void perform_8bit_test( const uint32_t i, const uint32_t j, uint8_t *, uint32_t *const context_eflags ){
+  uint32_t eflags = *context_eflags;
+  uint32_t k = i & j;
+  
+  UNSETOF(eflags);
+  UNSETCF(eflags);
+  CHECKSF8BIT;
+  CHECKZF8BIT;
+  CHECKPF;
+  *context_eflags = eflags;
+}
+
 inline uint32_t perform_32bit_mov( const uint32_t, const uint32_t j, uint32_t * dest, uint32_t *const ){
   *dest = j;
   return j;
@@ -190,7 +226,95 @@ inline uint8_t perform_8bit_and( const uint32_t i, const uint32_t j, uint8_t * d
   *dest = k;
   return k;
 }
+inline uint32_t perform_32bit_not( const uint32_t i, const uint32_t, uint32_t * dest, uint32_t *const ){
+  uint32_t k = ~i;
+  *dest = k;
+  return k;
+}
 
+inline uint16_t perform_16bit_not( const uint32_t i, const uint32_t, uint16_t * dest, uint32_t *const ){
+  uint16_t k = ~i;
+  *dest = k;
+  return k;
+}
+
+inline uint8_t perform_8bit_not( const uint32_t i, const uint32_t, uint8_t * dest, uint32_t *const ){
+  uint32_t k = ~i;
+  *dest = k;
+  return k;
+}
+
+inline uint32_t perform_32bit_neg( const uint32_t j, const uint32_t, uint32_t * dest, uint32_t *const context_eflags ){
+  uint32_t eflags = *context_eflags;
+  uint32_t i = 0;
+  uint32_t k = i - j;
+
+  if( j == 0 )
+    UNSETCF(eflags);
+  else
+    SETCF(eflags);
+
+  if( j == 0x80000000 )
+    SETOF(eflags);
+  else
+    UNSETOF(eflags);
+
+  CHECKSF32BIT;
+  CHECKZF32BIT;
+  CHECKPF;
+  CHECKAFSUBTRACTION;
+  *context_eflags = eflags;
+  *dest = k;
+  return k;
+}
+
+inline uint16_t perform_16bit_neg( const uint32_t j, const uint16_t, uint16_t * dest, uint32_t *const context_eflags ){
+  uint32_t eflags = *context_eflags;
+  uint32_t i = 0;
+  uint32_t k = i - j;
+
+  if( j == 0 )
+    UNSETCF(eflags);
+  else
+    SETCF(eflags);
+
+  if( j == 0x8000 )
+    SETOF(eflags);
+  else
+    UNSETOF(eflags);
+
+  CHECKSF16BIT;
+  CHECKZF16BIT;
+  CHECKPF;
+  CHECKAFSUBTRACTION;
+  *context_eflags = eflags;
+  *dest = k;
+  return k;
+}
+
+inline uint8_t perform_8bit_neg( const uint8_t j, const uint8_t, uint8_t * dest, uint32_t *const context_eflags ){
+  uint32_t eflags = *context_eflags;
+  uint32_t i = 0;
+  uint32_t k = i - j;
+
+  if( j == 0 )
+    UNSETCF(eflags);
+  else
+    SETCF(eflags);
+
+  if( j == 0x80 )
+    SETOF(eflags);
+  else
+    UNSETOF(eflags);
+
+  CHECKSF8BIT;
+  CHECKZF8BIT;
+  CHECKPF;
+  CHECKAFSUBTRACTION;
+  *context_eflags = eflags;
+  *dest = k;
+  return k;
+}
 inline uint32_t perform_32bit_dec( const uint32_t i, const uint32_t, uint32_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t j = 1;
@@ -254,7 +378,7 @@ inline uint32_t perform_32bit_inc( const uint32_t i, const uint32_t, uint32_t * 
 inline uint16_t perform_16bit_inc( const uint32_t i, const uint32_t, uint16_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t j = 1;
-  uint32_t k = i - j;
+  uint32_t k = i + j;
 
   CHECKOF16BITADDITION;
   CHECKSF16BIT;
@@ -269,7 +393,7 @@ inline uint16_t perform_16bit_inc( const uint32_t i, const uint32_t, uint16_t * 
 inline uint8_t perform_8bit_inc( const uint32_t i, const uint32_t, uint8_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t j = 1;
-  uint32_t k = i - j;
+  uint32_t k = i + j;
 
   CHECKOF8BITADDITION;
   CHECKSF8BIT;
