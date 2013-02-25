@@ -13,14 +13,15 @@
   <ItemGroup>
     <ClCompile Include="src\image.cpp" />
     <ClCompile Include="src\interpreter.cpp" />
-    <ClCompile Include="src\interpreter_add_sub_cmp.cpp" />
-    <ClCompile Include="src\interpreter_call_push_pop.cpp" />
+    <ClCompile Include="src\interpreter_instructions.cpp" />
+    <ClCompile Include="src\interpreter_callpushpop.cpp" />
     <ClCompile Include="src\interpreter_mov.cpp" />
     <ClCompile Include="src\interpreter_opcode_dispatch_table.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\options.cpp" />
     <ClCompile Include="src\pe.cpp" />
     <ClCompile Include="src\runtime.cpp" />
+    <ClCompile Include="src\syscall.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3p\include\pthread.h" />
@@ -33,6 +34,7 @@
     <ClInclude Include="include\interpreter_util_instructions.h" />
     <ClInclude Include="include\pe.h" />
     <ClInclude Include="include\runtime.h" />
+    <ClInclude Include="include\syscall.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{DAEF6DE8-2BA8-40F0-867B-D9F70D25D150}</ProjectGuid>
@@ -82,6 +84,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)\3p\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>pthreadVSE2.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <Profile>false</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -102,6 +105,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(ProjectDir)\3p\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>pthreadVSE2.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <Profile>false</Profile>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,16 +1,24 @@
 #include "interpreter.h"
 #include "runtime.h"
 #include <assert.h>
+#include "syscall.h"
 
 #ifndef _WIN32
 #include "interpreter_opcode_dispatch_table.cpp"
 #endif
+HANDLER_DEF_BEGIN(nop_handler) {
+  context->eip++;
+  context->code++;
+}
+HANDLER_DEF_END
+
 HANDLER_DEF_BEGIN(interrupt_handler) {
   switch(context->code[1]){
   case 0x80:
     switch(context->eax) {
     case 1:
-      fprintf( stdout, "INFO: sys_exit invoked. Exiting...\n");
+      fprintf( stdout, "INFO: sys_exit invoked with exit code %X (%d). Exiting...\n", context->ebx, context->ebx);
+#ifdef _WIN32
       __asm {
         mov ecx, context
         lea ecx, [ecx]context.ebx
@@ -22,9 +30,21 @@ HANDLER_DEF_BEGIN(interrupt_handler) {
         pop ebp
         ret
       }
+#else
+      return context->ebx;
+#endif
+      break;
+    case 4:
+      context->eax = handle_sys_write( table, context->ebx, context->ecx, context->edx );
+      break;
+    case 3:
+      context->eax = handle_sys_read( table, context->ebx, context->ecx, context->edx );
+      break;
+    case 265:
+      context->eax = handle_sys_clock_gettime( table, context->ebx, context->ecx );
       break;
     default:
-      fprintf( stderr, "ERROR: Invalid syscall number\n");
+      fprintf( stderr, "ERROR: Invalid system call number\n");
       break;
     }
     break;
@@ -32,6 +52,8 @@ HANDLER_DEF_BEGIN(interrupt_handler) {
     fprintf( stderr, "ERROR: Invalid interrupt vector number\n");
     assert(0);
   }
+  context->eip+=2;
+  context->code+=2;
 }
 HANDLER_DEF_END
 HANDLER_DEF_BEGIN(ret_handler){
@@ -89,7 +111,7 @@ HANDLER_DEF_BEGIN(lea_r1632_rm1632_handler) {
   uint32_t displacement = INT32_MAX;
   uint32_t src;
 
-  src = (uint32_t)get_rm( &context->code[1], context->general_purpose_registers, &displacement, table);
+  src = resolve_rm(context->general_purpose_registers, &context->code[1], &displacement );
 
   if( prefixes & PREFIX_OPERAND_SIZE_OVERRIDE ) {
     *((uint16_t *)&GETREG(context, GETREGNUM(context->code[1]))) = src;
@@ -106,8 +128,8 @@ HANDLER_DEF_END
 
     uint32_t displacement = INT32_MAX;
     uint32_t src;
-
-    src = (uint32_t)get_rm( &context->code[1], context->general_purpose_registers, &displacement, table);
+    
+    src = resolve_rm(context->general_purpose_registers, &context->code[1], &displacement );
 
     GETREG(context, GETREGNUM(context->code[1])) = src;
     context->eip +=displacement+1;
@@ -200,7 +222,7 @@ HANDLER_DEF_END
 
 
   HANDLER_DEF_BEGIN(undefined_opcode_handler) {
-    fprintf( stderr, "ERROR: Undefined opcode: %02X\n", context->code[0]);
+    fprintf( stderr, "ERROR: Undefined opcode %02X at [%08X]\n", context->code[0], context->eip);
 #ifndef _WIN32
     return -1;
 }

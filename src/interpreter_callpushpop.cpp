@@ -43,7 +43,40 @@ HANDLER_DEF_END
     }
 }
 HANDLER_DEF_END
+  HANDLER_DEF_BEGIN(jmp_rm1632_handler){
+    uint32_t prefixes = get_prefixes( &context->code, &context->eip );
+    uint32_t displacement;
+    uint32_t dest_address;
+    if( prefixes & PREFIX_OPERAND_SIZE_OVERRIDE )
+      dest_address = (int16_t)*((int16_t *)get_rm( &context->code[1], context->general_purpose_registers, &displacement, table));
+    else
+      dest_address = *((int32_t *)get_rm( &context->code[1], context->general_purpose_registers, &displacement, table));
 
+    dest_address += context->eip + displacement + 1;
+    unsigned char *dest = get_real_address( dest_address, table, EXECUTE );
+    if( dest == NULL ) {
+      fprintf( stderr, "ERROR: Invalid destination address for JMP rm1632\n");
+      assert(0);
+    }
+
+    context->eip = dest_address;
+    context->code = dest;
+}
+HANDLER_DEF_END
+  HANDLER_DEF_BEGIN(jmp_rm32_handler){
+    uint32_t displacement;
+    uint32_t dest_address = *((int32_t *)get_rm( &context->code[1], context->general_purpose_registers, &displacement, table));
+    dest_address += context->eip + displacement + 1;
+    unsigned char *dest = get_real_address( dest_address, table, EXECUTE );
+    if( dest == NULL ) {
+      fprintf( stderr, "ERROR: Invalid destination address for JMP rm32\n");
+      assert(0);
+    }
+
+    context->eip = dest_address;
+    context->code = dest;
+}
+HANDLER_DEF_END
 HANDLER_DEF_BEGIN(call_rel32_handler){
   assert( context->code[0] == 0xE8 );
 
@@ -57,8 +90,7 @@ HANDLER_DEF_BEGIN(call_rel32_handler){
   }
 
   context->esp-=sizeof(uint32_t);
-  dest = (uint32_t *)get_real_address( context->esp, table, WRITE );
-  *dest = context->eip + 5;
+  *((uint32_t *)get_real_address( context->esp, table, WRITE )) = context->eip + 5;
   context->eip = value;
   context->code = (unsigned char *)dest;
 }

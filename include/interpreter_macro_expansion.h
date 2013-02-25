@@ -28,7 +28,7 @@
   __asm mov table, edx \
   }
 
-#define HANDLER_DEF_END { dump_thread_context( context, table );}__asm { \
+#define HANDLER_DEF_END { /*dump_thread_context( context, table );*/} __asm { \
   __asm lea eax, opcode_dispatch_table \
   __asm mov ecx, context \
   __asm mov edx, table \
@@ -196,4 +196,46 @@
 #define HANDLER_DEF_RM1632_CL( cmd ) HANDLER_WITH_PREFIX_SIGN_EXT_DEF (cmd, rm1632, cl, get_rm( &context->code[1], context->general_purpose_registers, &displacement, table), *rm_field, (uint8_t)context->ecx, rm_field, 1, 1 )
 #define HANDLER_DEF_RM32_CL( cmd ) HANDLER_SIGN_EXT_DEF (cmd, 32, rm32, cl, get_rm( &context->code[1], context->general_purpose_registers, &displacement, table), *rm_field, (uint8_t)context->ecx, rm_field, 1 )
 
+#define HANDLER_DEF_JCC_REL( cmd, cond, bit, displacement, operand_position ) __declspec( naked ) int FASTCALL cmd ## _rel ## bit ## _handler( ThreadContext_t * const context , VirtualDirectoryLookupTable_t * const table) { \
+  HANDLER_DEF_PROLOG \
+  { \
+  if( cond ) { \
+    uint32_t dest_address = *((int ## bit ## _t *)&context->code[operand_position]) + context->eip + displacement; \
+    unsigned char *dest = get_real_address( dest_address, table, EXECUTE ); \
+    if( dest == NULL ) { \
+      fprintf( stderr, "ERROR: invalid destination address for branch\n" ); \
+      assert(0); \
+    } \
+    context->code = dest; \
+    context->eip = dest_address; \
+  } else { \
+    context->code+= displacement; \
+      context->eip+= displacement; \
+  } \
+} \
+HANDLER_DEF_END
+
+#define HANDLER_WITH_PREFIX_DEF_JCC_REL( cmd, cond, displacement_normal, displacement_override, operand_position ) __declspec( naked ) int FASTCALL cmd ## _rel1632_handler( ThreadContext_t * const context , VirtualDirectoryLookupTable_t * const table) { \
+  HANDLER_DEF_PROLOG \
+  { \
+  uint32_t prefixes = get_prefixes( &context->code, &context->eip ); \
+  if( cond ) { \
+  uint32_t dest_address = (prefixes & PREFIX_OPERAND_SIZE_OVERRIDE ? *((int16_t *)&context->code[1]) + displacement_override : *((int32_t *)&context->code[1]) + displacement_normal) + context->eip; \
+  unsigned char *dest = get_real_address( dest_address, table, EXECUTE ); \
+  if( dest == NULL ) { \
+  fprintf( stderr, "ERROR: invalid destination address for branch\n" ); \
+  assert(0); \
+  } \
+  context->code = dest; \
+  context->eip = dest_address; \
+  } else { \
+  context->code+= (prefixes & PREFIX_OPERAND_SIZE_OVERRIDE ? displacement_override : displacement_normal); \
+  context->eip+= (prefixes & PREFIX_OPERAND_SIZE_OVERRIDE ? displacement_override : displacement_normal); \
+  } \
+} \
+  HANDLER_DEF_END
+
+#define HANDLER_DEF_JCC_REL8( cmd, cond ) HANDLER_DEF_JCC_REL( cmd, cond, 8, 2, 1 )
+#define HANDLER_DEF_JCC_REL1632_WITH_ESCAPE_SEQUENCE( cmd, cond ) HANDLER_WITH_PREFIX_DEF_JCC_REL( cmd, cond, 5, 3, 2 )
+#define HANDLER_DEF_JCC_REL32_WITH_ESCAPE_SEQUENCE(cmd, cond ) HANDLER_DEF_JCC_REL( cmd, cond, 32, 5, 2)
 #endif //X86INTERPRETER_INTERPRETER_MACRO_EXPANSION_H

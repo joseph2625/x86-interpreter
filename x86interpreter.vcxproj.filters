@@ -9,7 +9,7 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="3p">
+    <Filter Include="Source Files\3p">
       <UniqueIdentifier>{92f68846-225b-4378-bc0c-03dd2372f908}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -38,10 +38,13 @@
     <ClCompile Include="src\interpreter_mov.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\interpreter_call_push_pop.cpp">
+    <ClCompile Include="src\syscall.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\interpreter_add_sub_cmp.cpp">
+    <ClCompile Include="src\interpreter_instructions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\interpreter_callpushpop.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -59,13 +62,13 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="3p\include\pthread.h">
-      <Filter>3p</Filter>
+      <Filter>Source Files\3p</Filter>
     </ClInclude>
     <ClInclude Include="3p\include\sched.h">
-      <Filter>3p</Filter>
+      <Filter>Source Files\3p</Filter>
     </ClInclude>
     <ClInclude Include="3p\include\semaphore.h">
-      <Filter>3p</Filter>
+      <Filter>Source Files\3p</Filter>
     </ClInclude>
     <ClInclude Include="include\interpreter_util.h">
       <Filter>Header Files</Filter>
@@ -74,6 +77,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\interpreter_util_instructions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\syscall.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

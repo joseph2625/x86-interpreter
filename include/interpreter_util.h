@@ -30,15 +30,11 @@
 
 #define PREFIX_INVALID UINT32_MAX
 
-
-
-
-
 #define GETEXTOPCODE(modrm) ( ( modrm >> 3 ) & 0x7 )
 #define GETREGNUM(modrm) GETEXTOPCODE(modrm)
 #define GETRM(modrm) ( modrm & 0x7 )
 #define GETREG(context, regnum) (context)->general_purpose_registers[regnum]
-#define GETREG8BIT(context, regnum) (( regnum < 4 ) ? (context)->register_field[regnum*4] : (context)->register_field[(regnum-4)*4+1] )
+#define GETREG8BIT(context, regnum) (( regnum < 4 ) ? (context)->register_field[(regnum)*4] : (context)->register_field[(regnum-4)*4+1] )
 #define GETMOD(modrm) ( modrm >> 6 )
 #define GETSS(sib) ( sib >> 6 )
 #define GETSIBINDEX(sib) ( ( sib >> 3 ) & 0x7 )
@@ -53,6 +49,24 @@ static const bool parity_table[256] =
 #   define P6(n) P4(n), P4(n^1), P4(n^1), P4(n)
   P6(0), P6(1), P6(1), P6(0)
 };
+
+#define ISSETCF(eflags) (((eflags) & 1) != 0 )
+#define ISSETPF(eflags) (((eflags) & (1 << 2))!= 0 )
+#define ISSETAF(eflags) (((eflags) & (1 << 4))!= 0 )
+#define ISSETZF(eflags) (((eflags) & (1 << 6))!= 0 )
+#define ISSETSF(eflags) (((eflags) & (1 << 7))!= 0 )
+#define ISSETTF(eflags) (((eflags) & (1 << 8))!= 0 )
+#define ISSETIF(eflags) (((eflags) & (1 << 9))!= 0 )
+#define ISSETDF(eflags) (((eflags) & (1 << 10))!= 0 )
+#define ISSETOF(eflags) (((eflags) & (1 << 11))!= 0 )
+//IOPL GOES HERE
+#define ISSETNT(eflags) (((eflags) & (1 << 14))!= 0 )
+#define ISSETRF(eflags) ((eflags) & (1 << 16))!= 0 )
+#define ISSETVM(eflags) (((eflags) & (1 << 17))!= 0 )
+#define ISSETAC(eflags) (((eflags) & (1 << 18))!= 0 )
+#define ISSETVIF(eflags) (((eflags) & (1 << 19))!= 0 )
+#define ISSETVIP(eflags) (((eflags) & (1 << 20))!= 0 )
+#define ISSETID(eflags) (((eflags) & (1 << 21))!= 0 )
 
 #define SETCF(eflags) ((eflags) = (eflags) | 1)
 #define SETPF(eflags) ((eflags) = (eflags) | (1 << 2))

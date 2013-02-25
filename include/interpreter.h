@@ -26,8 +26,8 @@ extern int (FASTCALL * testnotneg_rm1632_optimm1632_dispatch_table[8]) (ThreadCo
 extern int (FASTCALL * testnotneg_rm32_optimm32_dispatch_table[8]) (ThreadContext_t *, VirtualDirectoryLookupTable_t *);
 
 extern int (FASTCALL * decinc_rm8__dispatch_table[8]) (ThreadContext_t *, VirtualDirectoryLookupTable_t *);
-extern int (FASTCALL * callpushdecinc_rm32__dispatch_table[8]) (ThreadContext_t *, VirtualDirectoryLookupTable_t *);
-extern int (FASTCALL * callpushdecinc_rm1632__dispatch_table[8]) (ThreadContext_t *, VirtualDirectoryLookupTable_t *);
+extern int (FASTCALL * callpushdecincjmp_rm32__dispatch_table[8]) (ThreadContext_t *, VirtualDirectoryLookupTable_t *);
+extern int (FASTCALL * callpushdecincjmp_rm1632__dispatch_table[8]) (ThreadContext_t *, VirtualDirectoryLookupTable_t *);
 
 extern int (FASTCALL * salshlsarshr_rm8_1_dispatch_table[8]) (ThreadContext_t *, VirtualDirectoryLookupTable_t *);
 extern int (FASTCALL * salshlsarshr_rm1632_1_dispatch_table[8]) (ThreadContext_t *, VirtualDirectoryLookupTable_t *);
@@ -265,13 +265,72 @@ int FASTCALL inc_r32__handler( ThreadContext_t *const, VirtualDirectoryLookupTab
 
 
 int FASTCALL decinc_rm8__handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
-int FASTCALL callpushdecinc_rm1632__handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
-int FASTCALL callpushdecinc_rm32__handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL callpushdecincjmp_rm1632__handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL callpushdecincjmp_rm32__handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+
+int FASTCALL ja_rel8_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jae_rel8_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jb_rel8_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jbe_rel8_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL je_rel8_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jne_rel8_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jg_rel8_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jge_rel8_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jl_rel8_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jle_rel8_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jno_rel8_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jnp_rel8_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jns_rel8_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jo_rel8_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jp_rel8_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL js_rel8_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jmp_rel8_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+
+int FASTCALL ja_rel1632_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jae_rel1632_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jb_rel1632_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jbe_rel1632_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL je_rel1632_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jne_rel1632_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jg_rel1632_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jge_rel1632_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jl_rel1632_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jle_rel1632_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jno_rel1632_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jnp_rel1632_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jns_rel1632_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jo_rel1632_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jp_rel1632_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL js_rel1632_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jmp_rel1632_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+
+int FASTCALL ja_rel32_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jae_rel32_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jb_rel32_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jbe_rel32_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL je_rel32_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jne_rel32_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jg_rel32_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jge_rel32_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jl_rel32_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jle_rel32_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jno_rel32_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jnp_rel32_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jns_rel32_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jo_rel32_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jp_rel32_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL js_rel32_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jmp_rel32_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+
+int FASTCALL jmp_rm1632_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+int FASTCALL jmp_rm32_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
+
+int FASTCALL nop_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
 
 int FASTCALL lea_r32_rm32_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
 int FASTCALL leave32_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
 int FASTCALL interrupt_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
-//OPCODE WITH PREFIXES
+
 int FASTCALL callpush_rm1632_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
 int FASTCALL pop_rm1632_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
 int FASTCALL push_imm1632_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
@@ -280,9 +339,6 @@ int FASTCALL lea_r1632_rm1632_handler( ThreadContext_t *const, VirtualDirectoryL
 int FASTCALL leave1632_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
 int FASTCALL ret_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
 
-
-
-//OPCODE WITH ESCAPE SEQUENCE
 int FASTCALL push_fgs_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
 
 int FASTCALL prefix_handler( ThreadContext_t *const, VirtualDirectoryLookupTable_t *const );
