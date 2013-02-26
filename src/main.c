@@ -39,10 +39,10 @@ int main( int argc, char *argv[] ) {
   pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
   sem_t notifier_sem;
   sem_t wait_sem;
-  sem_init( &notifier_sem, NULL, 0 );
-  sem_init( &wait_sem, NULL, 0 );
+  sem_init( &notifier_sem, 0, 0 );
+  sem_init( &wait_sem, 0, 0 );
 
-  if( !set_up_runtime_environment( &image, &environment, mutex, notifier_sem, wait_sem ) ) {
+  if( !set_up_runtime_environment( &image, &environment, &mutex, &notifier_sem, &wait_sem ) ) {
     fprintf( stderr, "ERROR: Unable to set up the runtime environment\n" );
     return 1;
   }

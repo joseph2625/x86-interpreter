@@ -6,7 +6,7 @@ HANDLER_DEF_BEGIN(push_imm8_handler){
   assert( context->code[0] == 0x6A );
 
   context->esp-=sizeof(uint32_t);
-  uint32_t *dest = (uint32_t *)get_real_address( context->esp, table, WRITE );
+  uint32_t *dest = (uint32_t *)get_real_address( context->esp, table, WRITE, false );
   *dest = (int32_t)context->code[1];
   context->eip+=2;
   context->code+=2;
@@ -17,7 +17,7 @@ HANDLER_DEF_END
     assert( context->code[0] == 0x68 );
 
     context->esp-=sizeof(uint32_t);
-    uint32_t *dest = (uint32_t *)get_real_address( context->esp, table, WRITE );
+    uint32_t *dest = (uint32_t *)get_real_address( context->esp, table, WRITE, false );
     *dest = *((uint32_t *)(&context->code[1]));
     context->eip+=5;
     context->code+=5;
@@ -30,13 +30,13 @@ HANDLER_DEF_END
 
     if( prefixes & PREFIX_OPERAND_SIZE_OVERRIDE ){
       context->esp-=sizeof(uint16_t);
-      uint32_t *dest = (uint32_t *)get_real_address( context->esp, table, WRITE );
+      uint32_t *dest = (uint32_t *)get_real_address( context->esp, table, WRITE, false );
       *((uint16_t *)(dest)) = *((uint16_t *)(&context->code[1]));
       context->eip+=3;
       context->code+=3;
     } else {
       context->esp-=sizeof(uint32_t);
-      uint32_t *dest = (uint32_t *)get_real_address( context->esp, table, WRITE );
+      uint32_t *dest = (uint32_t *)get_real_address( context->esp, table, WRITE, false );
       *dest = *((uint32_t *)(&context->code[1]));
       context->eip+=5;
       context->code+=5;
@@ -53,7 +53,7 @@ HANDLER_DEF_END
       dest_address = *((int32_t *)get_rm( &context->code[1], context->general_purpose_registers, &displacement, table));
 
     dest_address += context->eip + displacement + 1;
-    unsigned char *dest = get_real_address( dest_address, table, EXECUTE );
+    unsigned char *dest = get_real_address( dest_address, table, EXECUTE, false );
     if( dest == NULL ) {
       fprintf( stderr, "ERROR: Invalid destination address for JMP rm1632\n");
       assert(0);
@@ -67,12 +67,8 @@ HANDLER_DEF_END
     uint32_t displacement;
     uint32_t dest_address = *((int32_t *)get_rm( &context->code[1], context->general_purpose_registers, &displacement, table));
     dest_address += context->eip + displacement + 1;
-    unsigned char *dest = get_real_address( dest_address, table, EXECUTE );
-    if( dest == NULL ) {
-      fprintf( stderr, "ERROR: Invalid destination address for JMP rm32\n");
-      assert(0);
-    }
-
+    unsigned char *dest = get_real_address( dest_address, table, EXECUTE, false );
+    
     context->eip = dest_address;
     context->code = dest;
 }
@@ -83,14 +79,10 @@ HANDLER_DEF_BEGIN(call_rel32_handler){
   uint32_t value;
   uint32_t *dest;
   value = context->eip + 5 + *((uint32_t *)(&context->code[1]));
-  dest = (uint32_t *)get_real_address(value, table, EXECUTE);
-  if(dest == NULL) {
-    fprintf( stderr, "ERROR: Invalid destination address for CALL rel32\n");
-    assert(0);
-  }
+  dest = (uint32_t *)get_real_address(value, table, EXECUTE, false);
 
   context->esp-=sizeof(uint32_t);
-  *((uint32_t *)get_real_address( context->esp, table, WRITE )) = context->eip + 5;
+  *((uint32_t *)get_real_address( context->esp, table, WRITE, false )) = context->eip + 5;
   context->eip = value;
   context->code = (unsigned char *)dest;
 }
@@ -109,7 +101,7 @@ HANDLER_DEF_END
       assert(0);
       break;
     }
-    uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE );
+    uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE, false );
     context->esp-=sizeof(uint32_t);
     *stack = to_push;
     context->eip+=2;
@@ -149,7 +141,7 @@ HANDLER_DEF_END
     }
 
     context->esp-=sizeof(uint32_t);
-    uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE );
+    uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE, false );
     *stack = to_push;
     context->eip++;
     context->code++;
@@ -189,10 +181,10 @@ HANDLER_DEF_BEGIN(push_r1632_handler) {
 
   if( prefixes & PREFIX_OPERAND_SIZE_OVERRIDE ) {
     context->esp-=sizeof(uint16_t);
-    uint16_t *stack = (uint16_t *)get_real_address( context->esp, table, WRITE );
+    uint16_t *stack = (uint16_t *)get_real_address( context->esp, table, WRITE, false );
     *stack = to_push;
   } else {
-    uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE );
+    uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE, false );
     context->esp-=sizeof(uint32_t);
     *stack = to_push;
   }
@@ -203,7 +195,7 @@ HANDLER_DEF_BEGIN(push_r1632_handler) {
 HANDLER_DEF_END
 HANDLER_DEF_BEGIN(pop_r32_handler) {
 
-  uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE );
+  uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE, false );
   context->esp+=sizeof(uint32_t);
 
   switch( context->code[0] ) {
@@ -229,7 +221,7 @@ HANDLER_DEF_END
 HANDLER_DEF_BEGIN(pop_r1632_handler) {
   uint32_t prefixes = get_prefixes( &context->code, &context->eip );
 
-  uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE );
+  uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE, false );
 
   if( prefixes & PREFIX_OPERAND_SIZE_OVERRIDE )
     context->esp+=sizeof(uint16_t);
@@ -278,20 +270,16 @@ HANDLER_DEF_END
     switch( GETEXTOPCODE(context->code[1]) ) {
     case 2:
       {
-        dest = (unsigned char*)get_real_address(value, table, EXECUTE);
-        if(dest == NULL) {
-          fprintf( stderr, "ERROR: Invalid destination address for CALL rm1632\n");
-          assert(0);
-        }
+        dest = (unsigned char*)get_real_address(value, table, EXECUTE, false);
         if ( prefixes & PREFIX_OPERAND_SIZE_OVERRIDE ) {
           context->esp-=sizeof(uint16_t);
           context->eip += displacement+1;
-          uint16_t *stack = (uint16_t *)get_real_address( context->esp, table, WRITE );
+          uint16_t *stack = (uint16_t *)get_real_address( context->esp, table, WRITE, false );
           *stack = (uint16_t)context->eip;
         } else {
           context->esp-=sizeof(uint32_t);
           context->eip += displacement+1;
-          uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE );
+          uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE, false );
           *stack = context->eip;
         }
         context->eip = value;
@@ -302,11 +290,11 @@ HANDLER_DEF_END
       {
         if ( prefixes & PREFIX_OPERAND_SIZE_OVERRIDE ) {
           context->esp-=sizeof(uint16_t);
-          uint16_t *stack = (uint16_t *)get_real_address( context->esp, table, WRITE );
+          uint16_t *stack = (uint16_t *)get_real_address( context->esp, table, WRITE, false );
           *stack = (uint16_t)value;
         } else {
           context->esp-=sizeof(uint32_t);
-          uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE );
+          uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE, false );
           *stack = value;
         }
         context->eip += displacement+1;
@@ -335,14 +323,10 @@ HANDLER_DEF_END
     switch( GETEXTOPCODE(context->code[1]) ) {
     case 2:
       {
-        dest = get_real_address(value, table, EXECUTE);
-        if(dest == NULL) {
-          fprintf( stderr, "ERROR: Invalid destination address for CALL rm32\n");
-          assert(0);
-        }
+        dest = get_real_address(value, table, EXECUTE, false);
         context->esp-=sizeof(uint32_t);
         context->eip += displacement+1;
-        uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE );
+        uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE, false );
         *stack = context->eip;
         context->eip = value;
         context->code = dest;
@@ -351,7 +335,7 @@ HANDLER_DEF_END
     case 6:
       {
         context->esp-=sizeof(uint32_t);
-        uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE );
+        uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE, false );
         *stack = value;
         context->eip += displacement+1;
         context->code += displacement+1;
@@ -378,11 +362,11 @@ HANDLER_DEF_BEGIN(pop_rm1632_handler) {
   case 6:
     {
       if ( prefixes & PREFIX_OPERAND_SIZE_OVERRIDE ) {
-        uint16_t *stack = (uint16_t *)get_real_address( context->esp, table, WRITE );
+        uint16_t *stack = (uint16_t *)get_real_address( context->esp, table, WRITE, false );
         *((uint16_t *)dest) = *stack;
         context->esp+=sizeof(uint16_t);
       } else {
-        uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE );
+        uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE, false );
         *dest = *stack;
         context->esp+=sizeof(uint32_t);
       }
@@ -410,7 +394,7 @@ HANDLER_DEF_BEGIN(pop_rm32_handler) {
   switch( GETEXTOPCODE(context->code[1]) ) {
   case 6:
     {
-      uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE );
+      uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, WRITE, false );
       *dest = *stack;
       context->esp+=sizeof(uint32_t);
     }

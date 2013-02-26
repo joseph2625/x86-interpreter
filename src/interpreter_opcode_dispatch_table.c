@@ -2,7 +2,7 @@
 
 #ifndef _WIN32
 #define DISPATCH_TABLE_DECL(name, size) static void *name[size] = 
-void FASTCALL dispatch( ThreadContext_t *const context, VirtualDirectoryLookupTable_t *const table ){
+int FASTCALL dispatch( ThreadContext_t *const context, VirtualDirectoryLookupTable_t *const table ){
 #else
 #define DISPATCH_TABLE_DECL(name, size) int (FASTCALL * name[size]) (ThreadContext_t *, VirtualDirectoryLookupTable_t *) = 
 #endif
@@ -1304,5 +1304,5 @@ static void *opcode_with_prefix_and_escape_sequence_dispatch_table[256] =
 };
 
 #ifndef _WIN32
-goto *opcode_dispatch_table[Context->code[0]];
+goto *opcode_dispatch_table[context->code[0]];
 #endif

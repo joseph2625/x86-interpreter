@@ -1,6 +1,8 @@
 #ifndef X86INTERPRETER_IMAGE_H
 #define X86INTERPRETER_IMAGE_H
-
+#ifndef _WIN32
+#include <stdbool.h>
+#endif
 #include <stdio.h>
 #include <stdint.h>
 
@@ -47,7 +49,7 @@ typedef struct Image {
 
 } Image_t;
 
-bool open_and_read_image_from_disk( char *file_name, void **destination_buffer );
+bool open_and_read_image_from_disk( Image_t *const image );
 bool load_image( Image_t *image );
 bool process_image( Image_t *image );
 void *get_raw_image_at_offset( Image_t *image, uint32_t offset, size_t size );

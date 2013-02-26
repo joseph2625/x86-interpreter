@@ -34,7 +34,7 @@
 #define GETREGNUM(modrm) GETEXTOPCODE(modrm)
 #define GETRM(modrm) ( modrm & 0x7 )
 #define GETREG(context, regnum) (context)->general_purpose_registers[regnum]
-#define GETREG8BIT(context, regnum) (( regnum < 4 ) ? (context)->register_field[(regnum)*4] : (context)->register_field[(regnum-4)*4+1] )
+#define GETREG8BIT(context, regnum) ((context)->register_field[( (regnum) < 4 ) ? (regnum)*4 : ((regnum) - 4)*4 + 1] )
 #define GETMOD(modrm) ( modrm >> 6 )
 #define GETSS(sib) ( sib >> 6 )
 #define GETSIBINDEX(sib) ( ( sib >> 3 ) & 0x7 )
@@ -104,7 +104,7 @@ static const bool parity_table[256] =
 #define UNSETVIP(eflags) ((eflags) = (eflags) & ~(1 << 20))
 #define UNSETID(eflags) ((eflags) = (eflags) & ~(1 << 21))
 
-inline uint32_t get_prefixes( unsigned char **code, uint32_t *eip ) {
+inline static uint32_t get_prefixes( unsigned char **code, uint32_t *eip ) {
   uint32_t prefixes = 0;
   do{
     switch((*code)[0]) {
@@ -178,7 +178,7 @@ inline uint32_t get_prefixes( unsigned char **code, uint32_t *eip ) {
 
 #define CHECKAFSUBTRACTION if( ( (int8_t)(i & 0xF) - (int8_t)(j & 0xF) ) < 0 ) SETAF(eflags); else UNSETAF(eflags);
 
-inline void print_access_violation( const uint32_t virtual_address, const unsigned int requested_access ) {
+inline static void print_access_violation( const uint32_t virtual_address, const unsigned int requested_access ) {
   char *access_string;
   switch( requested_access ) {
   case READ | WRITE:
@@ -203,7 +203,7 @@ inline void print_access_violation( const uint32_t virtual_address, const unsign
 }
 
 //TODO: HANDLE ADDRESS-MODE OVERRIDE PREFIX
-inline uint32_t resolve_rm( const uint32_t *general_purpose_registers, const unsigned char *code, uint32_t * const displacement) {
+inline static uint32_t resolve_rm( const uint32_t *general_purpose_registers, const unsigned char *code, uint32_t * const displacement) {
   uint32_t return_value;
 
   if( ( code[0] & 0xC7 ) == 0x5 ) { //disp32 exception
@@ -292,15 +292,15 @@ inline uint32_t resolve_rm( const uint32_t *general_purpose_registers, const uns
   return return_value;  
 }
 
-inline unsigned char * get_real_address( const uint32_t virtual_address, VirtualDirectoryLookupTable_t *const directory_lookup_table, const unsigned int requested_access, const bool suppress_access_violation_assertion = false )
+inline static unsigned char * get_real_address( const uint32_t virtual_address, VirtualDirectoryLookupTable_t *const directory_lookup_table, const unsigned int requested_access, const bool suppress_access_violation_assertion )
 {
   if( directory_lookup_table->tlb_key == ( virtual_address >> 12 ) )
     return directory_lookup_table->tlb_value + ( virtual_address & 4095 );
   else {
     VirtualPageLookupTable_t *page_lookup_table;
-    if( page_lookup_table = directory_lookup_table->page_lookup_table[virtual_address >> 22] ) {
+    if( ( page_lookup_table = directory_lookup_table->page_lookup_table[virtual_address >> 22] ) != NULL ) {
       unsigned char *frame;
-      if( frame = page_lookup_table->frames[(virtual_address >> 12) & 1023]) {
+      if( ( frame = page_lookup_table->frames[(virtual_address >> 12) & 1023]) != NULL ) {
         directory_lookup_table->tlb_key = ( virtual_address >> 12 );
         directory_lookup_table->tlb_value = frame;
         return frame + ( virtual_address & 4095 );
@@ -311,14 +311,14 @@ inline unsigned char * get_real_address( const uint32_t virtual_address, Virtual
     print_access_violation( virtual_address, requested_access );
   return NULL;
 }
-inline void *get_rm( unsigned char *modrm_pointer, uint32_t *const registers, uint32_t *displacement, VirtualDirectoryLookupTable_t *table ){
+inline static void *get_rm( unsigned char *modrm_pointer, uint32_t *const registers, uint32_t *displacement, VirtualDirectoryLookupTable_t *table ){
   void *dest;
   if( GETMOD(modrm_pointer[0]) == 3 ) {
     dest = &registers[GETRM(modrm_pointer[0])];
     *displacement=1;
   }
   else {
-    dest = get_real_address( resolve_rm(registers, modrm_pointer, displacement ), table, READ );
+    dest = get_real_address( resolve_rm(registers, modrm_pointer, displacement ), table, READ, false );
     if( dest == NULL ) {
       assert(0);
     }
@@ -327,7 +327,7 @@ inline void *get_rm( unsigned char *modrm_pointer, uint32_t *const registers, ui
   return dest;
 }
 //REQUIRE SEPARATE FUNCTION DUE TO DIFFERENT REGISTER ACCESS MODE IN 8BIT (FOR AL/AH; EBP,ESP,EDI,ESI ARE NOT 8BIT ACCESSIBLE)
-inline uint8_t *get_rm8( unsigned char *modrm_pointer, uint32_t *const registers, uint32_t *displacement, VirtualDirectoryLookupTable_t *table ){
+inline static uint8_t *get_rm8( unsigned char *modrm_pointer, uint32_t *const registers, uint32_t *displacement, VirtualDirectoryLookupTable_t *table ){
   uint8_t *dest;
   if( GETMOD(modrm_pointer[0]) == 3 ) { 
     switch(GETRM(modrm_pointer[0])){
@@ -348,7 +348,7 @@ inline uint8_t *get_rm8( unsigned char *modrm_pointer, uint32_t *const registers
     *displacement=1;
   }
   else {
-    dest = get_real_address( resolve_rm(registers, modrm_pointer, displacement ), table, READ );
+    dest = get_real_address( resolve_rm(registers, modrm_pointer, displacement ), table, READ, false );
     if( dest == NULL ) {
       assert(0);
     }
@@ -356,8 +356,12 @@ inline uint8_t *get_rm8( unsigned char *modrm_pointer, uint32_t *const registers
 
   return dest;
 }
-inline void dump_thread_context( ThreadContext_t *context, VirtualDirectoryLookupTable_t *table ){
+inline static void dump_thread_context( ThreadContext_t *context, VirtualDirectoryLookupTable_t *table ){
+#ifdef _WIN32
   system("cls");
+#else
+  printf("\033[2J\033[1;1H");
+#endif
   printf( "EAX %08X\nECX %08X\nEDX %08X\nEBX %08X\nESP %08X\nEBP %08X\nESI %08X\nEDI %08X\n\nEIP %08X\n\nC %d ES %04X\nP %d CS %04X\nA %d SS %04X\nZ %d DS %04X\nS %d FS %04X\nT %d GS %04X\nD %d\nO %d\n\nEFL %08X\n\n",
     context->general_purpose_registers[0],
     context->general_purpose_registers[1],
@@ -389,8 +393,8 @@ inline void dump_thread_context( ThreadContext_t *context, VirtualDirectoryLooku
     if( dest )
       printf( "%08X %08X\n", context->esp + i * 4, *dest );
   }
-  printf( "Press any key to continue...\n" );
-  getc(stdin);
+  //printf( "Press any key to continue...\n" );
+  //getc(stdin);
 
 }
 

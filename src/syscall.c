@@ -1,4 +1,6 @@
 #include "syscall.h"
+#include <errno.h>
+#include <time.h>
 
 size_t handle_sys_write( VirtualDirectoryLookupTable_t *table, int fd, uint32_t buffer_address, size_t count ) {
   if(fd == 1) { //ONLY SUPPORTS STDOUT FOR NOW
@@ -34,9 +36,9 @@ size_t handle_sys_read( VirtualDirectoryLookupTable_t *table, int fd, uint32_t b
   }
 }
 
-int handle_sys_clock_gettime( VirtualDirectoryLookupTable_t *table, clockid_t clkid, uint32_t timespec_address ){
+int handle_sys_clock_gettime( VirtualDirectoryLookupTable_t *table, uint32_t clkid, uint32_t timespec_address ){
   if( clkid == CLOCK_MONOTONIC ) {
-    timespec_t *timespec = (timespec_t *)get_real_address(timespec_address, table, READ, true);
+    struct timespec *timespec = (struct timespec *)get_real_address(timespec_address, table, READ, true);
     if( timespec ) {
 #ifdef _WIN32
       //timespec->tv_sec = GetTickCount();
@@ -51,7 +53,7 @@ int handle_sys_clock_gettime( VirtualDirectoryLookupTable_t *table, clockid_t cl
         return -EPERM;
       }
 #else
-      assert(0);
+      return clock_gettime( clkid, timespec );
 #endif
     } else {
       return -EFAULT;

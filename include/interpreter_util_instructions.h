@@ -2,7 +2,7 @@
 #define X86INTERPRETER_INTERPRETER_UTIL_INSTRUCTIONS_H
 #include "interpreter_util.h"
 
-inline uint32_t perform_32bit_add( const uint32_t i, const uint32_t j, uint32_t * dest, uint32_t *const context_eflags ){
+inline static uint32_t perform_32bit_add( const uint32_t i, const uint32_t j, uint32_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t k = i+j;
   CHECKCFADDITION;
@@ -16,7 +16,7 @@ inline uint32_t perform_32bit_add( const uint32_t i, const uint32_t j, uint32_t 
   return k;
 }
 
-inline uint16_t perform_16bit_add( const uint32_t i, const uint32_t j, uint16_t * dest, uint32_t *const context_eflags ){
+inline static uint16_t perform_16bit_add( const uint32_t i, const uint32_t j, uint16_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t k = ( i & 0xFFFF ) + ( j & 0xFFFF );
   CHECKCFADDITION;
@@ -30,7 +30,7 @@ inline uint16_t perform_16bit_add( const uint32_t i, const uint32_t j, uint16_t 
   return k;
 }
 
-inline uint8_t perform_8bit_add( const uint32_t i, const uint32_t j, uint8_t * dest, uint32_t *const context_eflags ){
+inline static uint8_t perform_8bit_add( const uint32_t i, const uint32_t j, uint8_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t k = ( i & 0xFF ) + ( j & 0xFF );
   CHECKCFADDITION;
@@ -44,7 +44,7 @@ inline uint8_t perform_8bit_add( const uint32_t i, const uint32_t j, uint8_t * d
   return k;
 }
 
-inline uint32_t perform_32bit_sub( const uint32_t i, const uint32_t j, uint32_t * dest, uint32_t *const context_eflags ){
+inline static uint32_t perform_32bit_sub( const uint32_t i, const uint32_t j, uint32_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t k = i - j;
   CHECKCFSUBTRACTION;
@@ -58,7 +58,7 @@ inline uint32_t perform_32bit_sub( const uint32_t i, const uint32_t j, uint32_t 
   return k;
 }
 
-inline uint16_t perform_16bit_sub( const uint32_t i, const uint32_t j, uint16_t * dest, uint32_t *const context_eflags ){
+inline static uint16_t perform_16bit_sub( const uint32_t i, const uint32_t j, uint16_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t k = ( i & 0xFFFF ) - ( j & 0xFFFF );
   CHECKCFSUBTRACTION;
@@ -72,7 +72,7 @@ inline uint16_t perform_16bit_sub( const uint32_t i, const uint32_t j, uint16_t 
   return k;
 }
 
-inline uint8_t perform_8bit_sub( const uint32_t i, const uint32_t j, uint8_t * dest, uint32_t *const context_eflags ){
+inline static uint8_t perform_8bit_sub( const uint32_t i, const uint32_t j, uint8_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t k = ( i & 0xFF ) - ( j & 0xFF );
   CHECKCFSUBTRACTION;
@@ -86,7 +86,7 @@ inline uint8_t perform_8bit_sub( const uint32_t i, const uint32_t j, uint8_t * d
   return k;
 }
 
-inline void perform_32bit_cmp( const uint32_t i, const uint32_t j, uint32_t *, uint32_t *const context_eflags ){
+inline static void perform_32bit_cmp( const uint32_t i, const uint32_t j, uint32_t *dummy, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t k = i - j;
   CHECKCFSUBTRACTION;
@@ -98,7 +98,7 @@ inline void perform_32bit_cmp( const uint32_t i, const uint32_t j, uint32_t *, u
   *context_eflags = eflags;
 }
 
-inline void perform_16bit_cmp( const uint32_t i, const uint32_t j, uint16_t *, uint32_t *const context_eflags ){
+inline static void perform_16bit_cmp( const uint32_t i, const uint32_t j, uint16_t *dummy, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t k = ( i & 0xFFFF ) - ( j & 0xFFFF );
   CHECKCFSUBTRACTION;
@@ -110,7 +110,7 @@ inline void perform_16bit_cmp( const uint32_t i, const uint32_t j, uint16_t *, u
   *context_eflags = eflags;
 }
 
-inline void perform_8bit_cmp( const uint32_t i, const uint32_t j, uint8_t *, uint32_t *const context_eflags ){
+inline static void perform_8bit_cmp( const uint32_t i, const uint32_t j, uint8_t *dummy, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t k = ( i & 0xFF ) - ( j & 0xFF );
   CHECKCFSUBTRACTION;
@@ -122,7 +122,7 @@ inline void perform_8bit_cmp( const uint32_t i, const uint32_t j, uint8_t *, uin
   *context_eflags = eflags;
 }
 
-inline void perform_32bit_test( const uint32_t i, const uint32_t j, uint32_t *, uint32_t *const context_eflags ){
+inline static void perform_32bit_test( const uint32_t i, const uint32_t j, uint32_t *dummy, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t k = i & j;
 
@@ -134,7 +134,7 @@ inline void perform_32bit_test( const uint32_t i, const uint32_t j, uint32_t *, 
   *context_eflags = eflags;
 }
 
-inline void perform_16bit_test( const uint32_t i, const uint32_t j, uint16_t *, uint32_t *const context_eflags ){
+inline static void perform_16bit_test( const uint32_t i, const uint32_t j, uint16_t *dummy, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t k = i & j;
 
@@ -146,7 +146,7 @@ inline void perform_16bit_test( const uint32_t i, const uint32_t j, uint16_t *, 
   *context_eflags = eflags;
 }
 
-inline void perform_8bit_test( const uint32_t i, const uint32_t j, uint8_t *, uint32_t *const context_eflags ){
+inline static void perform_8bit_test( const uint32_t i, const uint32_t j, uint8_t *dummy, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t k = i & j;
   
@@ -158,38 +158,38 @@ inline void perform_8bit_test( const uint32_t i, const uint32_t j, uint8_t *, ui
   *context_eflags = eflags;
 }
 
-inline uint32_t perform_32bit_mov( const uint32_t, const uint32_t j, uint32_t * dest, uint32_t *const ){
+inline static uint32_t perform_32bit_mov( const uint32_t dummy, const uint32_t j, uint32_t * dest, uint32_t *const context_eflags){
   *dest = j;
   return j;
 }
 
-inline uint32_t perform_32bit_movsx( const uint32_t i, const uint32_t j, uint32_t * dest, uint32_t *const context_eflags){
+inline static uint32_t perform_32bit_movsx( const uint32_t i, const uint32_t j, uint32_t * dest, uint32_t *const context_eflags){
   return perform_32bit_mov( i, j, dest, context_eflags );
 }
 
-inline uint32_t perform_32bit_movzx( const uint32_t i, const uint32_t j, uint32_t * dest, uint32_t *const context_eflags){
+inline static uint32_t perform_32bit_movzx( const uint32_t i, const uint32_t j, uint32_t * dest, uint32_t *const context_eflags){
   return perform_32bit_mov( i, j, dest, context_eflags );
 }
 
-inline uint16_t perform_16bit_mov( const uint32_t, const uint32_t j, uint16_t * dest, uint32_t *const ){
+inline static uint16_t perform_16bit_mov( const uint32_t dummy, const uint32_t j, uint16_t * dest, uint32_t *const context_eflags){
   *dest = j;
   return j;
 }
 
-inline uint16_t perform_16bit_movsx( const uint32_t i, const uint32_t j, uint16_t * dest, uint32_t *const context_eflags){
+inline static uint16_t perform_16bit_movsx( const uint32_t i, const uint32_t j, uint16_t * dest, uint32_t *const context_eflags){
   return perform_16bit_mov( i, j, dest, context_eflags);
 }
 
-inline uint16_t perform_16bit_movzx( const uint32_t i, const uint32_t j, uint16_t * dest, uint32_t *const context_eflags){
+inline static uint16_t perform_16bit_movzx( const uint32_t i, const uint32_t j, uint16_t * dest, uint32_t *const context_eflags){
   return perform_16bit_mov( i, j, dest, context_eflags);
 }
 
-inline uint8_t perform_8bit_mov( const uint32_t, const uint32_t j, uint8_t * dest, uint32_t *const ){
+inline static uint8_t perform_8bit_mov( const uint32_t dummy, const uint32_t j, uint8_t * dest, uint32_t *const context_eflags){
   *dest = j;
   return j;
 }
 
-inline uint32_t perform_32bit_and( const uint32_t i, const uint32_t j, uint32_t * dest, uint32_t *const context_eflags ){
+inline static uint32_t perform_32bit_and( const uint32_t i, const uint32_t j, uint32_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t k = i & j;
   UNSETOF(eflags);
@@ -201,7 +201,7 @@ inline uint32_t perform_32bit_and( const uint32_t i, const uint32_t j, uint32_t 
   *dest = k;
   return k;
 }
-inline uint16_t perform_16bit_and( const uint32_t i, const uint32_t j, uint16_t * dest, uint32_t *const context_eflags ){
+inline static uint16_t perform_16bit_and( const uint32_t i, const uint32_t j, uint16_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t k = i & j;
   UNSETOF(eflags);
@@ -214,7 +214,7 @@ inline uint16_t perform_16bit_and( const uint32_t i, const uint32_t j, uint16_t 
   return k;
 }
 
-inline uint8_t perform_8bit_and( const uint32_t i, const uint32_t j, uint8_t * dest, uint32_t *const context_eflags ){
+inline static uint8_t perform_8bit_and( const uint32_t i, const uint32_t j, uint8_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t k = i & j;
   UNSETOF(eflags);
@@ -227,7 +227,7 @@ inline uint8_t perform_8bit_and( const uint32_t i, const uint32_t j, uint8_t * d
   return k;
 }
 
-inline uint32_t perform_32bit_or( const uint32_t i, const uint32_t j, uint32_t * dest, uint32_t *const context_eflags ){
+inline static uint32_t perform_32bit_or( const uint32_t i, const uint32_t j, uint32_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t k = i | j;
   UNSETOF(eflags);
@@ -239,7 +239,7 @@ inline uint32_t perform_32bit_or( const uint32_t i, const uint32_t j, uint32_t *
   *dest = k;
   return k;
 }
-inline uint16_t perform_16bit_or( const uint32_t i, const uint32_t j, uint16_t * dest, uint32_t *const context_eflags ){
+inline static uint16_t perform_16bit_or( const uint32_t i, const uint32_t j, uint16_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t k = i | j;
   UNSETOF(eflags);
@@ -252,7 +252,7 @@ inline uint16_t perform_16bit_or( const uint32_t i, const uint32_t j, uint16_t *
   return k;
 }
 
-inline uint8_t perform_8bit_or( const uint32_t i, const uint32_t j, uint8_t * dest, uint32_t *const context_eflags ){
+inline static uint8_t perform_8bit_or( const uint32_t i, const uint32_t j, uint8_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t k = i | j;
   UNSETOF(eflags);
@@ -265,25 +265,25 @@ inline uint8_t perform_8bit_or( const uint32_t i, const uint32_t j, uint8_t * de
   return k;
 }
 
-inline uint32_t perform_32bit_not( const uint32_t i, const uint32_t, uint32_t * dest, uint32_t *const ){
+inline static uint32_t perform_32bit_not( const uint32_t i, const uint32_t dummy, uint32_t * dest, uint32_t *const context_eflags){
   uint32_t k = ~i;
   *dest = k;
   return k;
 }
 
-inline uint16_t perform_16bit_not( const uint32_t i, const uint32_t, uint16_t * dest, uint32_t *const ){
+inline static uint16_t perform_16bit_not( const uint32_t i, const uint32_t dummy, uint16_t * dest, uint32_t *const context_eflags){
   uint16_t k = ~i;
   *dest = k;
   return k;
 }
 
-inline uint8_t perform_8bit_not( const uint32_t i, const uint32_t, uint8_t * dest, uint32_t *const ){
+inline static uint8_t perform_8bit_not( const uint32_t i, const uint32_t dummy, uint8_t * dest, uint32_t *const context_eflags){
   uint32_t k = ~i;
   *dest = k;
   return k;
 }
 
-inline uint32_t perform_32bit_neg( const uint32_t j, const uint32_t, uint32_t * dest, uint32_t *const context_eflags ){
+inline static uint32_t perform_32bit_neg( const uint32_t j, const uint32_t dummy, uint32_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t i = 0;
   uint32_t k = i - j;
@@ -307,7 +307,7 @@ inline uint32_t perform_32bit_neg( const uint32_t j, const uint32_t, uint32_t * 
   return k;
 }
 
-inline uint16_t perform_16bit_neg( const uint32_t j, const uint16_t, uint16_t * dest, uint32_t *const context_eflags ){
+inline static uint16_t perform_16bit_neg( const uint32_t j, const uint16_t dummy, uint16_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t i = 0;
   uint32_t k = i - j;
@@ -331,7 +331,7 @@ inline uint16_t perform_16bit_neg( const uint32_t j, const uint16_t, uint16_t * 
   return k;
 }
 
-inline uint8_t perform_8bit_neg( const uint8_t j, const uint8_t, uint8_t * dest, uint32_t *const context_eflags ){
+inline static uint8_t perform_8bit_neg( const uint8_t j, const uint8_t dummy, uint8_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t i = 0;
   uint32_t k = i - j;
@@ -354,7 +354,7 @@ inline uint8_t perform_8bit_neg( const uint8_t j, const uint8_t, uint8_t * dest,
   *dest = k;
   return k;
 }
-inline uint32_t perform_32bit_dec( const uint32_t i, const uint32_t, uint32_t * dest, uint32_t *const context_eflags ){
+inline static uint32_t perform_32bit_dec( const uint32_t i, const uint32_t dummy, uint32_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t j = 1;
   uint32_t k = i - j;
@@ -369,7 +369,7 @@ inline uint32_t perform_32bit_dec( const uint32_t i, const uint32_t, uint32_t * 
   return k;
 }
 
-inline uint16_t perform_16bit_dec( const uint32_t i, const uint32_t, uint16_t * dest, uint32_t *const context_eflags ){
+inline static uint16_t perform_16bit_dec( const uint32_t i, const uint32_t dummy, uint16_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t j = 1;
   uint32_t k = i - j;
@@ -384,7 +384,7 @@ inline uint16_t perform_16bit_dec( const uint32_t i, const uint32_t, uint16_t * 
   return k;
 }
 
-inline uint8_t perform_8bit_dec( const uint32_t i, const uint32_t, uint8_t * dest, uint32_t *const context_eflags ){
+inline static uint8_t perform_8bit_dec( const uint32_t i, const uint32_t dummy, uint8_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t j = 1;
   uint32_t k = i - j;
@@ -399,7 +399,7 @@ inline uint8_t perform_8bit_dec( const uint32_t i, const uint32_t, uint8_t * des
   return k;
 }
 
-inline uint32_t perform_32bit_inc( const uint32_t i, const uint32_t, uint32_t * dest, uint32_t *const context_eflags ){
+inline static uint32_t perform_32bit_inc( const uint32_t i, const uint32_t dummy, uint32_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t j = 1;
   uint32_t k = i + j;
@@ -414,7 +414,7 @@ inline uint32_t perform_32bit_inc( const uint32_t i, const uint32_t, uint32_t * 
   return k;
 }
 
-inline uint16_t perform_16bit_inc( const uint32_t i, const uint32_t, uint16_t * dest, uint32_t *const context_eflags ){
+inline static uint16_t perform_16bit_inc( const uint32_t i, const uint32_t dummy, uint16_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t j = 1;
   uint32_t k = i + j;
@@ -429,7 +429,7 @@ inline uint16_t perform_16bit_inc( const uint32_t i, const uint32_t, uint16_t * 
   return k;
 }
 
-inline uint8_t perform_8bit_inc( const uint32_t i, const uint32_t, uint8_t * dest, uint32_t *const context_eflags ){
+inline static uint8_t perform_8bit_inc( const uint32_t i, const uint32_t dummy, uint8_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t j = 1;
   uint32_t k = i + j;
@@ -444,7 +444,7 @@ inline uint8_t perform_8bit_inc( const uint32_t i, const uint32_t, uint8_t * des
   return k;
 }
 
-inline uint32_t perform_32bit_sal( const uint32_t i, const uint8_t j, uint32_t * dest, uint32_t *const context_eflags ){
+inline static uint32_t perform_32bit_sal( const uint32_t i, const uint8_t j, uint32_t * dest, uint32_t *const context_eflags ){
   if( j == 0 ) return i;
 
   uint32_t eflags = *context_eflags;
@@ -479,7 +479,7 @@ inline uint32_t perform_32bit_sal( const uint32_t i, const uint8_t j, uint32_t *
   return k;
 }
 
-inline uint16_t perform_16bit_sal( const uint16_t i, const uint8_t j, uint16_t * dest, uint32_t *const context_eflags ){
+inline static uint16_t perform_16bit_sal( const uint16_t i, const uint8_t j, uint16_t * dest, uint32_t *const context_eflags ){
   if( j == 0 ) return i;
 
   uint32_t eflags = *context_eflags;
@@ -513,7 +513,7 @@ inline uint16_t perform_16bit_sal( const uint16_t i, const uint8_t j, uint16_t *
   return k;
 }
 
-inline uint8_t perform_8bit_sal( const uint8_t i, const uint8_t j, uint8_t * dest, uint32_t *const context_eflags ){
+inline static uint8_t perform_8bit_sal( const uint8_t i, const uint8_t j, uint8_t * dest, uint32_t *const context_eflags ){
   if( j == 0 ) return i;
 
   uint32_t eflags = *context_eflags;
@@ -546,17 +546,17 @@ inline uint8_t perform_8bit_sal( const uint8_t i, const uint8_t j, uint8_t * des
   *dest = k;
   return k;
 }
-inline uint32_t perform_32bit_shl( const uint32_t i, const uint8_t j, uint32_t * dest, uint32_t *const context_eflags ){
+inline static uint32_t perform_32bit_shl( const uint32_t i, const uint8_t j, uint32_t * dest, uint32_t *const context_eflags ){
   return perform_32bit_sal( i, j, dest, context_eflags );
 }
-inline uint16_t perform_16bit_shl( const uint16_t i, const uint8_t j, uint16_t * dest, uint32_t *const context_eflags ){
+inline static uint16_t perform_16bit_shl( const uint16_t i, const uint8_t j, uint16_t * dest, uint32_t *const context_eflags ){
   return perform_16bit_sal( i, j, dest, context_eflags );
 }
-inline uint8_t perform_8bit_shl( const uint8_t i, const uint8_t j, uint8_t * dest, uint32_t *const context_eflags ){
+inline static uint8_t perform_8bit_shl( const uint8_t i, const uint8_t j, uint8_t * dest, uint32_t *const context_eflags ){
   return perform_8bit_sal( i, j, dest, context_eflags );
 }
 
-inline uint32_t perform_32bit_sar( const uint32_t i, const uint8_t j, uint32_t * dest, uint32_t *const context_eflags ){
+inline static uint32_t perform_32bit_sar( const uint32_t i, const uint8_t j, uint32_t * dest, uint32_t *const context_eflags ){
   if( j == 0 ) return i;
 
   uint32_t eflags = *context_eflags;
@@ -580,7 +580,7 @@ inline uint32_t perform_32bit_sar( const uint32_t i, const uint8_t j, uint32_t *
   return k;
 }
 
-inline uint16_t perform_16bit_sar( const uint16_t i, const uint8_t j, uint16_t * dest, uint32_t *const context_eflags ){
+inline static uint16_t perform_16bit_sar( const uint16_t i, const uint8_t j, uint16_t * dest, uint32_t *const context_eflags ){
   if( j == 0 ) return i;
 
   uint32_t eflags = *context_eflags;
@@ -605,7 +605,7 @@ inline uint16_t perform_16bit_sar( const uint16_t i, const uint8_t j, uint16_t *
 }
 
 
-inline uint8_t perform_8bit_sar( const uint8_t i, const uint8_t j, uint8_t * dest, uint32_t *const context_eflags ){
+inline static uint8_t perform_8bit_sar( const uint8_t i, const uint8_t j, uint8_t * dest, uint32_t *const context_eflags ){
   if( j == 0 ) return i;
 
   uint32_t eflags = *context_eflags;
@@ -629,7 +629,7 @@ inline uint8_t perform_8bit_sar( const uint8_t i, const uint8_t j, uint8_t * des
   return k;
 }
 
-inline uint32_t perform_32bit_shr( const uint32_t i, const uint8_t j, uint32_t * dest, uint32_t *const context_eflags ){
+inline static uint32_t perform_32bit_shr( const uint32_t i, const uint8_t j, uint32_t * dest, uint32_t *const context_eflags ){
   if( j == 0 ) return i;
 
   uint32_t eflags = *context_eflags;
@@ -657,7 +657,7 @@ inline uint32_t perform_32bit_shr( const uint32_t i, const uint8_t j, uint32_t *
   return k;
 }
 
-inline uint16_t perform_16bit_shr( const uint16_t i, const uint8_t j, uint16_t * dest, uint32_t *const context_eflags ){
+inline static uint16_t perform_16bit_shr( const uint16_t i, const uint8_t j, uint16_t * dest, uint32_t *const context_eflags ){
   if( j == 0 ) return i;
 
   uint32_t eflags = *context_eflags;
@@ -686,7 +686,7 @@ inline uint16_t perform_16bit_shr( const uint16_t i, const uint8_t j, uint16_t *
 }
 
 
-inline uint8_t perform_8bit_shr( const uint8_t i, const uint8_t j, uint8_t * dest, uint32_t *const context_eflags ){
+inline static uint8_t perform_8bit_shr( const uint8_t i, const uint8_t j, uint8_t * dest, uint32_t *const context_eflags ){
   if( j == 0 ) return i;
 
   uint32_t eflags = *context_eflags;
@@ -714,7 +714,7 @@ inline uint8_t perform_8bit_shr( const uint8_t i, const uint8_t j, uint8_t * des
   return k;
 }
 
-inline uint32_t perform_32bit_xor( const uint32_t i, const uint32_t j, uint32_t * dest, uint32_t *const context_eflags ){
+inline static uint32_t perform_32bit_xor( const uint32_t i, const uint32_t j, uint32_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t k = i ^ j;
   UNSETOF(eflags);
@@ -726,7 +726,7 @@ inline uint32_t perform_32bit_xor( const uint32_t i, const uint32_t j, uint32_t 
   *dest = k;
   return k;
 }
-inline uint16_t perform_16bit_xor( const uint32_t i, const uint32_t j, uint16_t * dest, uint32_t *const context_eflags ){
+inline static uint16_t perform_16bit_xor( const uint32_t i, const uint32_t j, uint16_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t k = i ^ j;
   UNSETOF(eflags);
@@ -739,7 +739,7 @@ inline uint16_t perform_16bit_xor( const uint32_t i, const uint32_t j, uint16_t 
   return k;
 }
 
-inline uint8_t perform_8bit_xor( const uint32_t i, const uint32_t j, uint8_t * dest, uint32_t *const context_eflags ){
+inline static uint8_t perform_8bit_xor( const uint32_t i, const uint32_t j, uint8_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t k = i ^ j;
   UNSETOF(eflags);

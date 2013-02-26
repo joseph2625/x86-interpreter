@@ -8,12 +8,12 @@ HANDLER_DEF_BEGIN(mov_al_moffs8_handler) {
 
   uint8_t *to_move;
   if( prefixes & PREFIX_ADDRESS_SIZE_OVERRIDE ) {
-    to_move = get_real_address( *((uint16_t *)(&context->code[1])), table, READ );
+    to_move = get_real_address( *((uint16_t *)(&context->code[1])), table, READ, false );
     context->eip +=3;
     context->code +=3;
   }
   else {
-    to_move = get_real_address( *((uint32_t *)(&context->code[1])), table, READ );
+    to_move = get_real_address( *((uint32_t *)(&context->code[1])), table, READ, false );
     context->eip +=5;
     context->code +=5;
   }
@@ -29,9 +29,9 @@ HANDLER_DEF_BEGIN(mov_moffs8_al_handler) {
 
   uint8_t *to_move;
   if( prefixes & PREFIX_ADDRESS_SIZE_OVERRIDE )
-    to_move = get_real_address( *((uint16_t *)(&context->code[1])), table, READ );
+    to_move = get_real_address( *((uint16_t *)(&context->code[1])), table, READ, false );
   else
-    to_move = get_real_address( *((uint32_t *)(&context->code[1])), table, READ );
+    to_move = get_real_address( *((uint32_t *)(&context->code[1])), table, READ, false );
 
   *to_move = context->eax;
   context->eip +=2;
@@ -45,11 +45,11 @@ HANDLER_DEF_BEGIN(mov_ar_moffs1632_handler) {
 
   unsigned char*to_move;
   if( prefixes & PREFIX_ADDRESS_SIZE_OVERRIDE ) {
-    to_move = get_real_address( *((uint16_t *)(&context->code[1])), table, READ );
+    to_move = get_real_address( *((uint16_t *)(&context->code[1])), table, READ, false );
     context->eip +=3;
     context->code +=3;
   } else {
-    to_move = get_real_address( *((uint32_t *)(&context->code[1])), table, READ );
+    to_move = get_real_address( *((uint32_t *)(&context->code[1])), table, READ, false );
     context->eip +=5;
     context->code +=5;
   }
@@ -66,9 +66,9 @@ HANDLER_DEF_BEGIN(mov_moffs1632_ar_handler) {
 
   unsigned char*to_move;
   if( prefixes & PREFIX_ADDRESS_SIZE_OVERRIDE )
-    to_move = get_real_address( *((uint16_t *)(&context->code[1])), table, READ );
+    to_move = get_real_address( *((uint16_t *)(&context->code[1])), table, READ, false );
   else
-    to_move = get_real_address( *((uint32_t *)(&context->code[1])), table, READ );
+    to_move = get_real_address( *((uint32_t *)(&context->code[1])), table, READ, false );
 
   if( prefixes & PREFIX_OPERAND_SIZE_OVERRIDE ) {
     *((uint16_t *)(to_move)) = context->eax;
@@ -84,7 +84,6 @@ HANDLER_DEF_BEGIN(mov_moffs1632_ar_handler) {
 HANDLER_DEF_END
 
   HANDLER_DEF_BEGIN(mov_rm16_sreg_handler) {
-    uint32_t prefixes = get_prefixes( &context->code, &context->eip);
     assert( context->code[0] == 0x8C || context->code[0] == 0x8E);
 
     uint32_t displacement = INT32_MAX;

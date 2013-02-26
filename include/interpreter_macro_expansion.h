@@ -92,7 +92,7 @@
 #define FORCEINLINE __attribute__((always_inline))
 #define HANDLER_DECL(name) &&name
 #define HANDLER_DEF_BEGIN(name) name:
-#define HANDLER_DEF_END goto *opcode_dispatch_table[Context->code[0]];
+#define HANDLER_DEF_END /*dump_thread_context(context, table);*/ goto *opcode_dispatch_table[context->code[0]];
 #define HANDLER_INTERFACE( cmd, destname, srcname ) cmd ## _ ## destname ## _ ## srcname ## _handler:
 #define HANDLER_JCC_REL_INTERFACE( cmd, bit ) cmd ## _rel ## bit ## _handler:
 #define HANDLER_JCC_WITH_PREFIX_REL_INTERFACE( cmd ) cmd ## _rel1632_handler:
@@ -100,17 +100,17 @@
 
 
 #define HANDLER_EXTOPCODE_DISPATCH( cmd, destname, srcname ) cmd ## _ ## destname ## _ ## srcname ## _handler: { \
-  goto * ## cmd ## _ ## destname ## _ ## srcname ## _dispatch_table[GETEXTOPCODE(context->code[1])]; \
+  goto *cmd ## _ ## destname ## _ ## srcname ## _dispatch_table[GETEXTOPCODE(context->code[1])]; \
 }
 
 #define HANDLER_EXTOPCODE_WITH_PREFIX_DISPATCH( cmd, destname, srcname, opcode ) cmd ## _ ## destname ## _ ## srcname ## _handler: { \
   int i=0; \
   while ( context->code[i] != opcode ) \
     i++; \
-  goto cmd ## _ ## destname ## _ ## srcname ## _dispatch_table[GETEXTOPCODE(context->code[i+1])]; \
+  goto *cmd ## _ ## destname ## _ ## srcname ## _dispatch_table[GETEXTOPCODE(context->code[i+1])]; \
 }
 
-
+#define HANDLER_DEF_PROLOG
 #endif
 
 #define HANDLER_DEF( cmd, bit, destname, srcname, rm, arg1, arg2, dest, incr )  HANDLER_INTERFACE( cmd, destname, srcname ) \
@@ -209,8 +209,8 @@
 #define HANDLER_DEF_RM1632( cmd ) HANDLER_WITH_PREFIX_SIGN_EXT_DEF( cmd, rm1632, , get_rm( &context->code[1], context->general_purpose_registers, &displacement, table), *rm_field, 0, rm_field, 1, 1 )
 #define HANDLER_DEF_RM32( cmd ) HANDLER_SIGN_EXT_DEF( cmd, 32, rm32, , get_rm( &context->code[1], context->general_purpose_registers, &displacement, table), *rm_field, 0, rm_field, 1 )
 
-#define HANDLER_DEF_R1632( cmd, base_opcode ) HANDLER_WITH_PREFIX_SIGN_EXT_DEF( cmd, r1632, , NULL, GETREG(context, context->code[0] - base_opcode), NULL, &GETREG(context, context->code[0] - base_opcode), 1, 1 )
-#define HANDLER_DEF_R32( cmd, base_opcode ) HANDLER_SIGN_EXT_DEF( cmd, 32, r32, , NULL, GETREG(context, context->code[0] - base_opcode), NULL, &GETREG(context, context->code[0] - base_opcode), 1 )
+#define HANDLER_DEF_R1632( cmd, base_opcode ) HANDLER_WITH_PREFIX_SIGN_EXT_DEF( cmd, r1632, , NULL, GETREG(context, context->code[0] - base_opcode), 0, &GETREG(context, context->code[0] - base_opcode), 1, 1 )
+#define HANDLER_DEF_R32( cmd, base_opcode ) HANDLER_SIGN_EXT_DEF( cmd, 32, r32, , NULL, GETREG(context, context->code[0] - base_opcode), 0, &GETREG(context, context->code[0] - base_opcode), 1 )
 
 #define HANDLER_DEF_RM8_1( cmd ) HANDLER_SIGN_EXT_DEF( cmd, 8, rm8, 1, get_rm8( &context->code[1], context->general_purpose_registers, &displacement, table), *rm_field, 1, rm_field, 1 )
 #define HANDLER_DEF_RM1632_1( cmd ) HANDLER_WITH_PREFIX_SIGN_EXT_DEF( cmd, rm1632, 1, get_rm( &context->code[1], context->general_purpose_registers, &displacement, table), *rm_field, 1, rm_field, 1, 1 )
@@ -220,16 +220,12 @@
 #define HANDLER_DEF_RM1632_CL( cmd ) HANDLER_WITH_PREFIX_SIGN_EXT_DEF (cmd, rm1632, cl, get_rm( &context->code[1], context->general_purpose_registers, &displacement, table), *rm_field, (uint8_t)context->ecx, rm_field, 1, 1 )
 #define HANDLER_DEF_RM32_CL( cmd ) HANDLER_SIGN_EXT_DEF (cmd, 32, rm32, cl, get_rm( &context->code[1], context->general_purpose_registers, &displacement, table), *rm_field, (uint8_t)context->ecx, rm_field, 1 )
 
-#define HANDLER_DEF_JCC_REL( cmd, cond, bit, displacement, operand_position ) __declspec( naked ) int FASTCALL cmd ## _rel ## bit ## _handler( ThreadContext_t * const context , VirtualDirectoryLookupTable_t * const table) { \
+#define HANDLER_DEF_JCC_REL( cmd, cond, bit, displacement, operand_position ) HANDLER_JCC_REL_INTERFACE( cmd, bit )  \
   HANDLER_DEF_PROLOG \
   { \
   if( cond ) { \
     uint32_t dest_address = *((int ## bit ## _t *)&context->code[operand_position]) + context->eip + displacement; \
-    unsigned char *dest = get_real_address( dest_address, table, EXECUTE ); \
-    if( dest == NULL ) { \
-      fprintf( stderr, "ERROR: invalid destination address for branch\n" ); \
-      assert(0); \
-    } \
+    unsigned char *dest = get_real_address( dest_address, table, EXECUTE, false ); \
     context->code = dest; \
     context->eip = dest_address; \
   } else { \
@@ -245,11 +241,7 @@ HANDLER_DEF_END
   uint32_t prefixes = get_prefixes( &context->code, &context->eip ); \
   if( cond ) { \
   uint32_t dest_address = (prefixes & PREFIX_OPERAND_SIZE_OVERRIDE ? *((int16_t *)&context->code[1]) + displacement_override : *((int32_t *)&context->code[1]) + displacement_normal) + context->eip; \
-  unsigned char *dest = get_real_address( dest_address, table, EXECUTE ); \
-  if( dest == NULL ) { \
-  fprintf( stderr, "ERROR: invalid destination address for branch\n" ); \
-  assert(0); \
-  } \
+  unsigned char *dest = get_real_address( dest_address, table, EXECUTE, false ); \
   context->code = dest; \
   context->eip = dest_address; \
   } else { \

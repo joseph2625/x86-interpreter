@@ -10,9 +10,9 @@ void update_virtual_memory_lookup_table_on_create( RuntimeEnvironment_t *environ
   unsigned char *buffer = newly_created_page->buffer;
 
   do{
-    VirtualPageLookupTable *pageLookupTable = environment->directory_table.page_lookup_table[address >> 22];
+    VirtualPageLookupTable_t *pageLookupTable = environment->directory_table.page_lookup_table[address >> 22];
     if( pageLookupTable == NULL ) {
-      pageLookupTable = environment->directory_table.page_lookup_table[address >> 22] = (VirtualPageLookupTable *)calloc( 1, sizeof(VirtualPageLookupTable) );
+      pageLookupTable = environment->directory_table.page_lookup_table[address >> 22] = (VirtualPageLookupTable_t *)calloc( 1, sizeof(VirtualPageLookupTable_t) );
       if( pageLookupTable == NULL )
         assert( 0 );
     }
@@ -49,7 +49,7 @@ uint32_t insert_new_page_in_between( VirtualPageNode_t * prev, uint32_t requeste
   update_virtual_memory_lookup_table_on_create( environment, prev->next );
   return prev->next->begin;
 }
-uint32_t create_virtual_memory_page( RuntimeEnvironment_t *environment, uint32_t requested_size = UNSPECIFIED_SIZE, uint32_t requested_base = UNSPECIFIED_BASE, unsigned char *initial_data = NULL, uint32_t initial_data_size = UNSPECIFIED_SIZE  ){
+uint32_t create_virtual_memory_page( RuntimeEnvironment_t *environment, uint32_t requested_size, uint32_t requested_base, unsigned char *initial_data, uint32_t initial_data_size){
 
   VirtualPageNode_t *next = environment->page_list->next;
   VirtualPageNode_t *prev = environment->page_list;
@@ -150,27 +150,19 @@ bool load_sections_to_virtual_memory( Image_t *image, RuntimeEnvironment_t *envi
 void *runtime_thread( void *context ) {
   PthreadContext_t *pthread_context = (PthreadContext_t *)context;
 
-#ifndef _WIN32
-  sigset_t set;
-  sigfillset(&set);
-  pthread_sigmask( SIG_BLOCK, &set, NULL);
-#endif
-
   pthread_context->thread_node->exit_code = interpret( pthread_context->runtime_environment, pthread_context->thread_node );
 
   pthread_context->thread_node->state = EXITED;
 
-  pthread_mutex_lock( &pthread_context->mutex );
-
-  sem_post( &pthread_context->notifier_sem );
-  sem_wait( &pthread_context->wait_sem );
-  pthread_mutex_unlock( &pthread_context->mutex );
-
+  pthread_mutex_lock( pthread_context->mutex );
+  sem_post( pthread_context->notifier_sem );
+  sem_wait( pthread_context->wait_sem );
+  pthread_mutex_unlock( pthread_context->mutex );
   free( context );
   return NULL;
 }
 
-bool create_thread( RuntimeEnvironment_t *environment, uint32_t entry_point, uint32_t stack_size, pthread_mutex_t mutex, sem_t notifier_sem, sem_t wait_sem  )
+bool create_thread( RuntimeEnvironment_t *environment, uint32_t entry_point, uint32_t stack_size, pthread_mutex_t *mutex, sem_t *notifier_sem, sem_t *wait_sem  )
 {
 
   ThreadNode_t *temp_node = environment->threads;
@@ -182,10 +174,10 @@ bool create_thread( RuntimeEnvironment_t *environment, uint32_t entry_point, uin
 
   environment->threads->context.eip = 4096*16;
   environment->threads->context.eax = entry_point;
-  environment->threads->context.esp = create_virtual_memory_page( environment, stack_size );
-  environment->threads->context.code = get_real_address( environment->threads->context.eip, &environment->directory_table, EXECUTE );
+  environment->threads->context.esp = create_virtual_memory_page( environment, stack_size, UNSPECIFIED_BASE, NULL, UNSPECIFIED_SIZE );
+  environment->threads->context.code = get_real_address( environment->threads->context.eip, &environment->directory_table, EXECUTE, false );
   
-  if( environment->threads->context.esp == NULL ) {
+  if( environment->threads->context.esp == 0 ) {
     free(environment->threads);
     environment->threads = temp_node;
     return false;
@@ -209,12 +201,12 @@ bool create_thread( RuntimeEnvironment_t *environment, uint32_t entry_point, uin
 bool insert_thread_entry_point( RuntimeEnvironment_t *environment, uint32_t initial_stack_size )
 {
   unsigned char wrapper_opcodes[] = { 0xFF, 0xD0, 0x8B, 0xD8, 0xB8, 0x01, 0x00, 0x00, 0x00, 0xCD, 0x80 };//call eax; mov ebx, eax; mov eax, 1; int 80h
-  if( create_virtual_memory_page(environment, 4096, 4096*16, wrapper_opcodes, sizeof(wrapper_opcodes)) == NULL )
+  if( create_virtual_memory_page(environment, 4096, 4096*16, wrapper_opcodes, sizeof(wrapper_opcodes)) == 0 )
     return false;
 
   return true;
 }
-bool set_up_runtime_environment( Image_t *image, RuntimeEnvironment_t *environment, pthread_mutex_t mutex, sem_t notifier_sem, sem_t wait_sem )
+bool set_up_runtime_environment( Image_t *image, RuntimeEnvironment_t *environment, pthread_mutex_t *mutex, sem_t *notifier_sem, sem_t *wait_sem )
 {
   memset( environment, 0, sizeof(RuntimeEnvironment_t) );
   

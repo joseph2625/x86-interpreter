@@ -80,7 +80,7 @@ typedef struct ThreadNode{
   ThreadState_t state;
   uint32_t exit_code;
   pthread_t pthread;
-  ThreadNode *next;
+  struct ThreadNode *next;
 } ThreadNode_t;
 
 #define READ 0x1
@@ -92,12 +92,12 @@ typedef struct VirtualPageNode {
   size_t size;
   unsigned char *buffer;
 
-  VirtualPageNode *next;
+  struct VirtualPageNode *next;
 } VirtualPageNode_t;
 
 typedef struct RuntimeEnvironment {
   VirtualDirectoryLookupTable_t directory_table;
-  VirtualPageNode *page_list;
+  VirtualPageNode_t *page_list;
 
   unsigned int thread_count;
   ThreadNode_t *threads;
@@ -107,12 +107,12 @@ typedef struct RuntimeEnvironment {
 typedef struct PthreadContext{
   ThreadNode_t *thread_node;
   RuntimeEnvironment_t *runtime_environment;
-  pthread_mutex_t mutex;
-  sem_t notifier_sem;
-  sem_t wait_sem;
+  pthread_mutex_t *mutex;
+  sem_t *notifier_sem;
+  sem_t *wait_sem;
 } PthreadContext_t;
 
-bool set_up_runtime_environment( Image_t *image, RuntimeEnvironment_t *environment, pthread_mutex_t mutex, sem_t notifier_sem, sem_t wait_sem );
-bool create_thread( RuntimeEnvironment_t *environment, uint32_t entry_point, uint32_t stack_size, pthread_mutex_t mutex, sem_t notifier_sem, sem_t wait_sem );
+bool set_up_runtime_environment( Image_t *image, RuntimeEnvironment_t *environment, pthread_mutex_t *mutex, sem_t *notifier_sem, sem_t *wait_sem );
+bool create_thread( RuntimeEnvironment_t *environment, uint32_t entry_point, uint32_t stack_size, pthread_mutex_t *mutex, sem_t *notifier_sem, sem_t *wait_sem );
 bool update_runtime_environment( RuntimeEnvironment_t *environment );
 #endif //X86INTERPRETER_RUNTIME_H

@@ -28,6 +28,8 @@ obj/
 [Bb]in
 [Dd]ebug*/
 [Rr]elease*/
+obj-debug*/
+obj-release*/
 Ankh.NoLoad
 
 #MonoDevelop

@@ -59,9 +59,9 @@ HANDLER_DEF_END
 HANDLER_DEF_BEGIN(ret_handler){
   assert( context->code[0] == 0xC2 || context->code[0] == 0xC3);
 
-  uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, READ );
+  uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, READ, false );
   context->eip = *stack;
-  unsigned char*ret_address = get_real_address( context->eip, table, EXECUTE );
+  unsigned char*ret_address = get_real_address( context->eip, table, EXECUTE, false );
 
   if( context->code[0] == 0xC3 ) {
     context->esp+=4;
@@ -77,12 +77,12 @@ HANDLER_DEF_BEGIN(leave1632_handler) {
 
   if( prefixes & PREFIX_OPERAND_SIZE_OVERRIDE ){
     *((uint16_t *)&context->esp) = context->ebp;
-    uint16_t *stack = (uint16_t *)get_real_address( context->esp, table, READ );
+    uint16_t *stack = (uint16_t *)get_real_address( context->esp, table, READ, false );
     *((uint16_t *)&context->ebp) = *stack;
     context->esp += 2;
   } else {
     context->esp = context->ebp;
-    uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, READ );
+    uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, READ, false );
     context->ebp = *stack;
     context->esp += 4;
   }
@@ -94,7 +94,7 @@ HANDLER_DEF_END
 HANDLER_DEF_BEGIN(leave32_handler) {
   assert( context->code[0] == 0xC9);
   context->esp = context->ebp;
-  uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, READ );
+  uint32_t *stack = (uint32_t *)get_real_address( context->esp, table, READ, false );
   context->ebp = *stack;
   context->esp += 4;
 
@@ -164,7 +164,7 @@ jmp eax
 #else
 {
   int i = 1;
-  while(opcode_with_prefix_dispatch_table(context->code[i]) != prefix_handler)
+  while(opcode_with_prefix_dispatch_table[context->code[i]] == &&prefix_handler)
     i++;
 
   goto *opcode_with_prefix_dispatch_table[context->code[i]];
@@ -196,11 +196,13 @@ prefix_loop:
       jmp eax
 }
 #else
+{
   int i = 1;
-while(opcode_with_prefix_and_escape_sequence_dispatch_table(context->code[i]) != prefix_with_escape_sequence_handler)
+while(opcode_with_prefix_and_escape_sequence_dispatch_table[context->code[i]] == &&prefix_with_escape_sequence_handler)
   i++;
 
 goto *opcode_with_prefix_and_escape_sequence_dispatch_table[context->code[i]];
+}
 #endif
 HANDLER_DEF_END
 
