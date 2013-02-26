@@ -14,37 +14,37 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\image.cpp">
+    <ClCompile Include="src\image.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\interpreter.cpp">
+    <ClCompile Include="src\interpreter.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\main.cpp">
+    <ClCompile Include="src\interpreter_instructions.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\options.cpp">
+    <ClCompile Include="src\interpreter_callpushpop.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\pe.cpp">
+    <ClCompile Include="src\interpreter_mov.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\runtime.cpp">
+    <ClCompile Include="src\interpreter_opcode_dispatch_table.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\interpreter_opcode_dispatch_table.cpp">
+    <ClCompile Include="src\main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\interpreter_mov.cpp">
+    <ClCompile Include="src\options.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\syscall.cpp">
+    <ClCompile Include="src\pe.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\interpreter_instructions.cpp">
+    <ClCompile Include="src\runtime.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\interpreter_callpushpop.cpp">
+    <ClCompile Include="src\syscall.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

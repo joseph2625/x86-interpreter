@@ -11,17 +11,17 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\image.cpp" />
-    <ClCompile Include="src\interpreter.cpp" />
-    <ClCompile Include="src\interpreter_instructions.cpp" />
-    <ClCompile Include="src\interpreter_callpushpop.cpp" />
-    <ClCompile Include="src\interpreter_mov.cpp" />
-    <ClCompile Include="src\interpreter_opcode_dispatch_table.cpp" />
-    <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\options.cpp" />
-    <ClCompile Include="src\pe.cpp" />
-    <ClCompile Include="src\runtime.cpp" />
-    <ClCompile Include="src\syscall.cpp" />
+    <ClCompile Include="src\image.c" />
+    <ClCompile Include="src\interpreter.c" />
+    <ClCompile Include="src\interpreter_instructions.c" />
+    <ClCompile Include="src\interpreter_callpushpop.c" />
+    <ClCompile Include="src\interpreter_mov.c" />
+    <ClCompile Include="src\interpreter_opcode_dispatch_table.c" />
+    <ClCompile Include="src\main.c" />
+    <ClCompile Include="src\options.c" />
+    <ClCompile Include="src\pe.c" />
+    <ClCompile Include="src\runtime.c" />
+    <ClCompile Include="src\syscall.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3p\include\pthread.h" />
@@ -97,6 +97,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)\include\;$(ProjectDir)\3p\include\</AdditionalIncludeDirectories>
+      <CompileAs>CompileAsCpp</CompileAs>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
