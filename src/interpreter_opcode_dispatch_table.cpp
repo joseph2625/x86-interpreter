@@ -7,10 +7,10 @@ void FASTCALL dispatch( ThreadContext_t *const context, VirtualDirectoryLookupTa
 #define DISPATCH_TABLE_DECL(name, size) int (FASTCALL * name[size]) (ThreadContext_t *, VirtualDirectoryLookupTable_t *) = 
 #endif
 
-DISPATCH_TABLE_DECL(addsubcmpandxor_rm8_imm8_dispatch_table, 8)
+DISPATCH_TABLE_DECL(addsubcmpandxoror_rm8_imm8_dispatch_table, 8)
 {
   HANDLER_DECL(add_rm8_imm8_handler), //0x00
-  HANDLER_DECL(undefined_opcode_handler), //0x01
+  HANDLER_DECL(or_rm8_imm8_handler), //0x01
   HANDLER_DECL(undefined_opcode_handler), //0x02
   HANDLER_DECL(undefined_opcode_handler), //0x03
   HANDLER_DECL(and_rm8_imm8_handler), //0x04
@@ -31,10 +31,10 @@ DISPATCH_TABLE_DECL(testnotneg_rm8_optimm8_dispatch_table, 8)
   HANDLER_DECL(undefined_opcode_handler), //0x07
 };
 
-DISPATCH_TABLE_DECL(addsubcmpandxor_rm1632_imm1632_dispatch_table, 8)
+DISPATCH_TABLE_DECL(addsubcmpandxoror_rm1632_imm1632_dispatch_table, 8)
 {
     HANDLER_DECL(add_rm1632_imm1632_handler), //0x00
-    HANDLER_DECL(undefined_opcode_handler), //0x01
+    HANDLER_DECL(or_rm1632_imm1632_handler), //0x01
     HANDLER_DECL(undefined_opcode_handler), //0x02
     HANDLER_DECL(undefined_opcode_handler), //0x03
     HANDLER_DECL(and_rm1632_imm1632_handler), //0x04
@@ -55,10 +55,10 @@ DISPATCH_TABLE_DECL(testnotneg_rm1632_optimm1632_dispatch_table, 8)
   HANDLER_DECL(undefined_opcode_handler), //0x07
 };
 
-DISPATCH_TABLE_DECL(addsubcmpandxor_rm32_imm32_dispatch_table, 8)
+DISPATCH_TABLE_DECL(addsubcmpandxoror_rm32_imm32_dispatch_table, 8)
 {
     HANDLER_DECL(add_rm32_imm32_handler), //0x00
-    HANDLER_DECL(undefined_opcode_handler), //0x01
+    HANDLER_DECL(or_rm32_imm32_handler), //0x01
     HANDLER_DECL(undefined_opcode_handler), //0x02
     HANDLER_DECL(undefined_opcode_handler), //0x03
     HANDLER_DECL(and_rm32_imm32_handler), //0x04
@@ -79,10 +79,10 @@ DISPATCH_TABLE_DECL(testnotneg_rm32_optimm32_dispatch_table, 8)
   HANDLER_DECL(undefined_opcode_handler), //0x07
 };
 
-DISPATCH_TABLE_DECL(addsubcmpandxor_rm1632_imm8_dispatch_table, 8)
+DISPATCH_TABLE_DECL(addsubcmpandxoror_rm1632_imm8_dispatch_table, 8)
 {
     HANDLER_DECL(add_rm1632_imm8_handler), //0x00
-    HANDLER_DECL(undefined_opcode_handler), //0x01
+    HANDLER_DECL(or_rm1632_imm8_handler), //0x01
     HANDLER_DECL(undefined_opcode_handler), //0x02
     HANDLER_DECL(undefined_opcode_handler), //0x03
     HANDLER_DECL(and_rm1632_imm8_handler), //0x04
@@ -91,10 +91,10 @@ DISPATCH_TABLE_DECL(addsubcmpandxor_rm1632_imm8_dispatch_table, 8)
     HANDLER_DECL(cmp_rm1632_imm8_handler), //0x07
 };
 
-DISPATCH_TABLE_DECL(addsubcmpandxor_rm32_imm8_dispatch_table, 8)
+DISPATCH_TABLE_DECL(addsubcmpandxoror_rm32_imm8_dispatch_table, 8)
 {
     HANDLER_DECL(add_rm32_imm8_handler), //0x00
-    HANDLER_DECL(undefined_opcode_handler), //0x01
+    HANDLER_DECL(or_rm32_imm8_handler), //0x01
     HANDLER_DECL(undefined_opcode_handler), //0x02
     HANDLER_DECL(undefined_opcode_handler), //0x03
     HANDLER_DECL(and_rm32_imm8_handler), //0x04
@@ -257,12 +257,12 @@ DISPATCH_TABLE_DECL(opcode_dispatch_table, 256)
   HANDLER_DECL(add_eax_imm32_handler), //0x05
   HANDLER_DECL(push_r32_handler), //0x06
   HANDLER_DECL(undefined_opcode_handler), //0x07
-  HANDLER_DECL(undefined_opcode_handler), //0x08
-  HANDLER_DECL(undefined_opcode_handler), //0x09
-  HANDLER_DECL(undefined_opcode_handler), //0x0A
-  HANDLER_DECL(undefined_opcode_handler), //0x0B
-  HANDLER_DECL(undefined_opcode_handler), //0x0C
-  HANDLER_DECL(undefined_opcode_handler), //0x0D
+  HANDLER_DECL(or_rm8_r8_handler), //0x08
+  HANDLER_DECL(or_rm32_r32_handler), //0x09
+  HANDLER_DECL(or_r8_rm8_handler), //0x0A
+  HANDLER_DECL(or_r32_rm32_handler), //0x0B
+  HANDLER_DECL(or_al_imm8_handler), //0x0C
+  HANDLER_DECL(or_eax_imm32_handler), //0x0D
   HANDLER_DECL(push_r32_handler), //0x0E
   HANDLER_DECL(escape_sequence_handler), //0x0F
   HANDLER_DECL(undefined_opcode_handler), //0x10
@@ -377,10 +377,10 @@ DISPATCH_TABLE_DECL(opcode_dispatch_table, 256)
   HANDLER_DECL(jge_rel8_handler), //0x7D
   HANDLER_DECL(jle_rel8_handler), //0x7E
   HANDLER_DECL(jg_rel8_handler), //0x7F
-  HANDLER_DECL(addsubcmpandxor_rm8_imm8_handler), //0x80
-  HANDLER_DECL(addsubcmpandxor_rm32_imm32_handler), //0x81
+  HANDLER_DECL(addsubcmpandxoror_rm8_imm8_handler), //0x80
+  HANDLER_DECL(addsubcmpandxoror_rm32_imm32_handler), //0x81
   HANDLER_DECL(undefined_opcode_handler), //0x82
-  HANDLER_DECL(addsubcmpandxor_rm32_imm8_handler), //0x83
+  HANDLER_DECL(addsubcmpandxoror_rm32_imm8_handler), //0x83
   HANDLER_DECL(test_rm8_r8_handler), //0x84
   HANDLER_DECL(test_rm32_r32_handler), //0x85
   HANDLER_DECL(undefined_opcode_handler), //0x86
@@ -523,11 +523,11 @@ static void *opcode_with_prefix_dispatch_table[256] =
     HANDLER_DECL(push_r1632_handler), //0x06
     HANDLER_DECL(undefined_opcode_handler), //0x07
     HANDLER_DECL(undefined_opcode_handler), //0x08
-    HANDLER_DECL(undefined_opcode_handler), //0x09
+    HANDLER_DECL(or_rm1632_r1632_handler), //0x09
     HANDLER_DECL(undefined_opcode_handler), //0x0A
-    HANDLER_DECL(undefined_opcode_handler), //0x0B
+    HANDLER_DECL(or_r1632_rm1632_handler), //0x0B
     HANDLER_DECL(undefined_opcode_handler), //0x0C
-    HANDLER_DECL(undefined_opcode_handler), //0x0D
+    HANDLER_DECL(or_ar1632_imm1632_handler), //0x0D
     HANDLER_DECL(push_r1632_handler), //0x0E
     HANDLER_DECL(prefix_with_escape_sequence_handler), //0x0F
     HANDLER_DECL(undefined_opcode_handler), //0x10
@@ -643,9 +643,9 @@ static void *opcode_with_prefix_dispatch_table[256] =
     HANDLER_DECL(undefined_opcode_handler), //0x7E
     HANDLER_DECL(undefined_opcode_handler), //0x7F
     HANDLER_DECL(undefined_opcode_handler), //0x80
-    HANDLER_DECL(addsubcmpandxor_rm1632_imm1632_handler), //0x81
+    HANDLER_DECL(addsubcmpandxoror_rm1632_imm1632_handler), //0x81
     HANDLER_DECL(undefined_opcode_handler), //0x82
-    HANDLER_DECL(addsubcmpandxor_rm1632_imm8_handler), //0x83
+    HANDLER_DECL(addsubcmpandxoror_rm1632_imm8_handler), //0x83
     HANDLER_DECL(undefined_opcode_handler), //0x84
     HANDLER_DECL(test_rm1632_r1632_handler), //0x85
     HANDLER_DECL(undefined_opcode_handler), //0x86
@@ -924,22 +924,22 @@ static void *opcode_with_escape_sequence_dispatch_table[256] =
     HANDLER_DECL(jge_rel32_handler), //0x8D
     HANDLER_DECL(jle_rel32_handler), //0x8E
     HANDLER_DECL(jg_rel32_handler), //0x8F
-    HANDLER_DECL(undefined_opcode_handler), //0x90
-    HANDLER_DECL(undefined_opcode_handler), //0x91
-    HANDLER_DECL(undefined_opcode_handler), //0x92
-    HANDLER_DECL(undefined_opcode_handler), //0x93
-    HANDLER_DECL(undefined_opcode_handler), //0x94
-    HANDLER_DECL(undefined_opcode_handler), //0x95
-    HANDLER_DECL(undefined_opcode_handler), //0x96
-    HANDLER_DECL(undefined_opcode_handler), //0x97
-    HANDLER_DECL(undefined_opcode_handler), //0x98
-    HANDLER_DECL(undefined_opcode_handler), //0x99
-    HANDLER_DECL(undefined_opcode_handler), //0x9A
-    HANDLER_DECL(undefined_opcode_handler), //0x9B
-    HANDLER_DECL(undefined_opcode_handler), //0x9C
-    HANDLER_DECL(undefined_opcode_handler), //0x9D
-    HANDLER_DECL(undefined_opcode_handler), //0x9E
-    HANDLER_DECL(undefined_opcode_handler), //0x9F
+    HANDLER_DECL(seto_rm8_handler), //0x90
+    HANDLER_DECL(setno_rm8_handler), //0x91
+    HANDLER_DECL(setb_rm8_handler), //0x92
+    HANDLER_DECL(setae_rm8_handler), //0x93
+    HANDLER_DECL(sete_rm8_handler), //0x94
+    HANDLER_DECL(setne_rm8_handler), //0x95
+    HANDLER_DECL(setbe_rm8_handler), //0x96
+    HANDLER_DECL(seta_rm8_handler), //0x97
+    HANDLER_DECL(sets_rm8_handler), //0x98
+    HANDLER_DECL(setns_rm8_handler), //0x99
+    HANDLER_DECL(setp_rm8_handler), //0x9A
+    HANDLER_DECL(setnp_rm8_handler), //0x9B
+    HANDLER_DECL(setl_rm8_handler), //0x9C
+    HANDLER_DECL(setge_rm8_handler), //0x9D
+    HANDLER_DECL(setle_rm8_handler), //0x9E
+    HANDLER_DECL(setg_rm8_handler), //0x9F
     HANDLER_DECL(push_fgs_handler), //0xA0
     HANDLER_DECL(undefined_opcode_handler), //0xA1
     HANDLER_DECL(undefined_opcode_handler), //0xA2

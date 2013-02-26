@@ -226,6 +226,45 @@ inline uint8_t perform_8bit_and( const uint32_t i, const uint32_t j, uint8_t * d
   *dest = k;
   return k;
 }
+
+inline uint32_t perform_32bit_or( const uint32_t i, const uint32_t j, uint32_t * dest, uint32_t *const context_eflags ){
+  uint32_t eflags = *context_eflags;
+  uint32_t k = i | j;
+  UNSETOF(eflags);
+  UNSETCF(eflags);
+  CHECKSF32BIT;
+  CHECKZF32BIT;
+  CHECKPF;
+  *context_eflags = eflags;
+  *dest = k;
+  return k;
+}
+inline uint16_t perform_16bit_or( const uint32_t i, const uint32_t j, uint16_t * dest, uint32_t *const context_eflags ){
+  uint32_t eflags = *context_eflags;
+  uint32_t k = i | j;
+  UNSETOF(eflags);
+  UNSETCF(eflags);
+  CHECKSF16BIT;
+  CHECKZF16BIT;
+  CHECKPF;
+  *context_eflags = eflags;
+  *dest = k;
+  return k;
+}
+
+inline uint8_t perform_8bit_or( const uint32_t i, const uint32_t j, uint8_t * dest, uint32_t *const context_eflags ){
+  uint32_t eflags = *context_eflags;
+  uint32_t k = i | j;
+  UNSETOF(eflags);
+  UNSETCF(eflags);
+  CHECKSF8BIT;
+  CHECKZF8BIT;
+  CHECKPF;
+  *context_eflags = eflags;
+  *dest = k;
+  return k;
+}
+
 inline uint32_t perform_32bit_not( const uint32_t i, const uint32_t, uint32_t * dest, uint32_t *const ){
   uint32_t k = ~i;
   *dest = k;

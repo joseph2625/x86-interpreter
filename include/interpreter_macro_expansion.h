@@ -238,4 +238,16 @@ HANDLER_DEF_END
 #define HANDLER_DEF_JCC_REL8( cmd, cond ) HANDLER_DEF_JCC_REL( cmd, cond, 8, 2, 1 )
 #define HANDLER_DEF_JCC_REL1632_WITH_ESCAPE_SEQUENCE( cmd, cond ) HANDLER_WITH_PREFIX_DEF_JCC_REL( cmd, cond, 5, 3, 2 )
 #define HANDLER_DEF_JCC_REL32_WITH_ESCAPE_SEQUENCE(cmd, cond ) HANDLER_DEF_JCC_REL( cmd, cond, 32, 5, 2)
+
+#define HANDLER_DEF_SETCC_RM8( cmd, cond ) __declspec( naked ) int FASTCALL cmd ## _rm8_handler( ThreadContext_t * const context , VirtualDirectoryLookupTable_t * const table) { \
+  HANDLER_DEF_PROLOG \
+  { \
+  uint32_t displacement = 0; \
+  uint8_t *dest = get_rm8( &context->code[2], context->general_purpose_registers, &displacement, table); \
+  *dest = (cond ? 1 : 0); \
+  context->code+=displacement+3; \
+  context->eip +=displacement+3; \
+} \
+  HANDLER_DEF_END
+
 #endif //X86INTERPRETER_INTERPRETER_MACRO_EXPANSION_H

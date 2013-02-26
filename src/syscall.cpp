@@ -39,8 +39,8 @@ int handle_sys_clock_gettime( VirtualDirectoryLookupTable_t *table, clockid_t cl
     timespec_t *timespec = (timespec_t *)get_real_address(timespec_address, table, READ, true);
     if( timespec ) {
 #ifdef _WIN32
-      timespec->tv_sec = GetTickCount();
-      /*
+      //timespec->tv_sec = GetTickCount();
+      
       LARGE_INTEGER count;
       LARGE_INTEGER freq;
       if( QueryPerformanceCounter( &count ) && QueryPerformanceFrequency( &freq ) ) {
@@ -49,7 +49,7 @@ int handle_sys_clock_gettime( VirtualDirectoryLookupTable_t *table, clockid_t cl
         return 0;
       } else {
         return -EPERM;
-      }*/
+      }
 #else
       assert(0);
 #endif
