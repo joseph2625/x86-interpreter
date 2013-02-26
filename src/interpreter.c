@@ -4,7 +4,7 @@
 #include "syscall.h"
 
 #ifndef _WIN32
-#include "interpreter_opcode_dispatch_table.cpp"
+#include "interpreter_opcode_dispatch_table.c"
 #endif
 HANDLER_DEF_BEGIN(nop_handler) {
   context->eip++;
@@ -162,8 +162,13 @@ pop ebp
 jmp eax
 }
 #else
-  //TODO: FIX FOR GCC
-goto *opcode_dispatch_table[Context->code[1]];
+{
+  int i = 1;
+  while(opcode_with_prefix_dispatch_table(context->code[i]) != prefix_handler)
+    i++;
+
+  goto *opcode_with_prefix_dispatch_table[context->code[i]];
+}
 #endif
 HANDLER_DEF_END
 
@@ -191,8 +196,11 @@ prefix_loop:
       jmp eax
 }
 #else
-  //TODO: FIX FOR GCC
-  goto *opcode_dispatch_table[Context->code[1]];
+  int i = 1;
+while(opcode_with_prefix_and_escape_sequence_dispatch_table(context->code[i]) != prefix_with_escape_sequence_handler)
+  i++;
+
+goto *opcode_with_prefix_and_escape_sequence_dispatch_table[context->code[i]];
 #endif
 HANDLER_DEF_END
 
@@ -215,8 +223,7 @@ HANDLER_DEF_END
       jmp eax
 }
 #else
-  //TODO: FIX FOR GCC
-  goto *opcode_dispatch_table[Context->code[1]];
+  goto *opcode_with_escape_sequence_dispatch_table[context->code[1]];
 #endif
 HANDLER_DEF_END
 
@@ -241,9 +248,9 @@ __asm {
 #endif
 
 #ifndef _WIN32
-#include "interpreter_add_sub.cpp"
-#include "interpreter_call_push.cpp"
-#include "interpreter_mov.cpp"
+#include "interpreter_instructions.c"
+#include "interpreter_callpushpop.c"
+#include "interpreter_mov.c"
 }
 #else
 HANDLER_DEF_BEGIN( dispatch )

@@ -46,65 +46,6 @@
   } \
 }
 
-#define HANDLER_DEF( cmd, bit, destname, srcname, rm, arg1, arg2, dest, incr )  __declspec( naked ) int FASTCALL cmd ## _ ## destname ## _ ## srcname ## _handler( ThreadContext_t * const context , VirtualDirectoryLookupTable_t * const table) { \
-  HANDLER_DEF_PROLOG \
-  { \
-  uint32_t displacement = 0; \
-  uint32_t *rm_field = (uint32_t *)rm; \
-  perform_ ## bit ## bit_ ## cmd( *((uint ## bit ## _t *)&arg1 ), *((uint ## bit ## _t *)&arg2 ), (uint ## bit ## _t *)dest, &context->eflags ); \
-  context->code+= incr + displacement; \
-  context->eip+= incr + displacement; \
-} \
-  HANDLER_DEF_END
-
-// exception for sign-extended operand
-#define HANDLER_SIGN_EXT_DEF( cmd, bit, destname, srcname, rm, arg1, arg2, dest, incr )  __declspec( naked ) int FASTCALL cmd ## _ ## destname ## _ ## srcname ## _handler( ThreadContext_t * const context , VirtualDirectoryLookupTable_t * const table) { \
-  HANDLER_DEF_PROLOG \
-  { \
-  uint32_t displacement = 0; \
-  uint32_t *rm_field = (uint32_t *)rm; \
-  perform_ ## bit ## bit_ ## cmd( *((uint ## bit ## _t *)&arg1 ), arg2, (uint ## bit ## _t *)dest, &context->eflags ); \
-  context->code+= incr + displacement; \
-  context->eip+= incr + displacement; \
-} \
-  HANDLER_DEF_END
-
-
-#define HANDLER_WITH_PREFIX_DEF( cmd, destname, srcname, rm, arg1, arg2, dest, incr_normal, incr_operand_size_override )  __declspec( naked ) int FASTCALL cmd ## _ ## destname ## _ ## srcname ## _handler( ThreadContext_t * const context , VirtualDirectoryLookupTable_t * const table) { \
-  HANDLER_DEF_PROLOG \
-  { \
-   uint32_t displacement = 0; \
-   uint32_t prefixes = get_prefixes( &context->code, &context->eip ); \
-   uint32_t *rm_field = (uint32_t *)rm; \
-   if( prefixes & PREFIX_OPERAND_SIZE_OVERRIDE ){ \
-    perform_16bit_ ## cmd( *((uint16_t *)&arg1 ), *((uint16_t *)&arg2), (uint16_t *)dest, &context->eflags ); \
-    context->code+= displacement + incr_operand_size_override; \
-    context->eip+= displacement + incr_operand_size_override; \
-  } else { \
-    perform_32bit_ ## cmd( *((uint32_t *)&arg1 ), *((uint32_t *)&arg2 ), (uint32_t *)dest, &context->eflags ); \
-    context->code+= displacement + incr_normal; \
-    context->eip+= displacement + incr_normal; \
-  } \
-  } \
-  HANDLER_DEF_END
-// exception for sign-extended operand
-#define HANDLER_WITH_PREFIX_SIGN_EXT_DEF( cmd, destname, srcname, rm, arg1, arg2, dest, incr_normal, incr_operand_size_override )  __declspec( naked ) int FASTCALL cmd ## _ ## destname ## _ ## srcname ## _handler( ThreadContext_t * const context , VirtualDirectoryLookupTable_t * const table) { \
-  HANDLER_DEF_PROLOG \
-  { \
-  uint32_t displacement = 0; \
-  uint32_t prefixes = get_prefixes( &context->code, &context->eip ); \
-  uint32_t *rm_field = (uint32_t *)rm; \
-  if( prefixes & PREFIX_OPERAND_SIZE_OVERRIDE ){ \
-  perform_16bit_ ## cmd( *((uint16_t *)&arg1 ), arg2, (uint16_t *)dest, &context->eflags ); \
-  context->code+= displacement + incr_operand_size_override; \
-  context->eip+= displacement + incr_operand_size_override; \
-  } else { \
-  perform_32bit_ ## cmd( *((uint32_t *)&arg1 ), arg2, (uint32_t *)dest, &context->eflags ); \
-  context->code+= displacement + incr_normal; \
-  context->eip+= displacement + incr_normal; \
-  } \
-  } \
-  HANDLER_DEF_END
 
 #define HANDLER_EXTOPCODE_DISPATCH( cmd, destname, srcname ) __declspec( naked ) int FASTCALL cmd ## _ ## destname ## _ ## srcname ## _handler( ThreadContext_t * const context , VirtualDirectoryLookupTable_t * const table) { __asm { \
   __asm push ebx \
@@ -142,13 +83,96 @@
   } \
 }
 
+#define HANDLER_INTERFACE( cmd, destname, srcname ) __declspec( naked ) int FASTCALL cmd ## _ ## destname ## _ ## srcname ## _handler( ThreadContext_t * const context , VirtualDirectoryLookupTable_t * const table) {
+#define HANDLER_JCC_REL_INTERFACE( cmd, bit ) __declspec( naked ) int FASTCALL cmd ## _rel ## bit ## _handler( ThreadContext_t * const context , VirtualDirectoryLookupTable_t * const table) {
+#define HANDLER_JCC_WITH_PREFIX_REL_INTERFACE( cmd ) __declspec( naked ) int FASTCALL cmd ## _rel1632_handler( ThreadContext_t * const context , VirtualDirectoryLookupTable_t * const table) {
+#define HANDLER_SETCC_RM8_INTERFACE( cmd ) __declspec( naked ) int FASTCALL cmd ## _rm8_handler( ThreadContext_t * const context , VirtualDirectoryLookupTable_t * const table) {
 #else
 #define FASTCALL __attribute__((fastcall))
 #define FORCEINLINE __attribute__((always_inline))
 #define HANDLER_DECL(name) &&name
 #define HANDLER_DEF_BEGIN(name) name:
 #define HANDLER_DEF_END goto *opcode_dispatch_table[Context->code[0]];
+#define HANDLER_INTERFACE( cmd, destname, srcname ) cmd ## _ ## destname ## _ ## srcname ## _handler:
+#define HANDLER_JCC_REL_INTERFACE( cmd, bit ) cmd ## _rel ## bit ## _handler:
+#define HANDLER_JCC_WITH_PREFIX_REL_INTERFACE( cmd ) cmd ## _rel1632_handler:
+#define HANDLER_SETCC_RM8_INTERFACE( cmd ) cmd ## _rm8_handler:
+
+
+#define HANDLER_EXTOPCODE_DISPATCH( cmd, destname, srcname ) cmd ## _ ## destname ## _ ## srcname ## _handler: { \
+  goto * ## cmd ## _ ## destname ## _ ## srcname ## _dispatch_table[GETEXTOPCODE(context->code[1])]; \
+}
+
+#define HANDLER_EXTOPCODE_WITH_PREFIX_DISPATCH( cmd, destname, srcname, opcode ) cmd ## _ ## destname ## _ ## srcname ## _handler: { \
+  int i=0; \
+  while ( context->code[i] != opcode ) \
+    i++; \
+  goto cmd ## _ ## destname ## _ ## srcname ## _dispatch_table[GETEXTOPCODE(context->code[i+1])]; \
+}
+
+
 #endif
+
+#define HANDLER_DEF( cmd, bit, destname, srcname, rm, arg1, arg2, dest, incr )  HANDLER_INTERFACE( cmd, destname, srcname ) \
+  HANDLER_DEF_PROLOG \
+  { \
+  uint32_t displacement = 0; \
+  uint32_t *rm_field = (uint32_t *)rm; \
+  perform_ ## bit ## bit_ ## cmd( *((uint ## bit ## _t *)&arg1 ), *((uint ## bit ## _t *)&arg2 ), (uint ## bit ## _t *)dest, &context->eflags ); \
+  context->code+= incr + displacement; \
+  context->eip+= incr + displacement; \
+} \
+  HANDLER_DEF_END
+
+// exception for sign-extended operand
+#define HANDLER_SIGN_EXT_DEF( cmd, bit, destname, srcname, rm, arg1, arg2, dest, incr ) HANDLER_INTERFACE(cmd, destname, srcname) \
+  HANDLER_DEF_PROLOG \
+  { \
+  uint32_t displacement = 0; \
+  uint32_t *rm_field = (uint32_t *)rm; \
+  perform_ ## bit ## bit_ ## cmd( *((uint ## bit ## _t *)&arg1 ), arg2, (uint ## bit ## _t *)dest, &context->eflags ); \
+  context->code+= incr + displacement; \
+  context->eip+= incr + displacement; \
+} \
+  HANDLER_DEF_END
+
+
+#define HANDLER_WITH_PREFIX_DEF( cmd, destname, srcname, rm, arg1, arg2, dest, incr_normal, incr_operand_size_override ) HANDLER_INTERFACE( cmd, destname, srcname ) \
+  HANDLER_DEF_PROLOG \
+  { \
+  uint32_t displacement = 0; \
+  uint32_t prefixes = get_prefixes( &context->code, &context->eip ); \
+  uint32_t *rm_field = (uint32_t *)rm; \
+  if( prefixes & PREFIX_OPERAND_SIZE_OVERRIDE ){ \
+  perform_16bit_ ## cmd( *((uint16_t *)&arg1 ), *((uint16_t *)&arg2), (uint16_t *)dest, &context->eflags ); \
+  context->code+= displacement + incr_operand_size_override; \
+  context->eip+= displacement + incr_operand_size_override; \
+  } else { \
+  perform_32bit_ ## cmd( *((uint32_t *)&arg1 ), *((uint32_t *)&arg2 ), (uint32_t *)dest, &context->eflags ); \
+  context->code+= displacement + incr_normal; \
+  context->eip+= displacement + incr_normal; \
+  } \
+  } \
+  HANDLER_DEF_END
+// exception for sign-extended operand
+#define HANDLER_WITH_PREFIX_SIGN_EXT_DEF( cmd, destname, srcname, rm, arg1, arg2, dest, incr_normal, incr_operand_size_override ) HANDLER_INTERFACE( cmd, destname, srcname ) \
+  HANDLER_DEF_PROLOG \
+  { \
+  uint32_t displacement = 0; \
+  uint32_t prefixes = get_prefixes( &context->code, &context->eip ); \
+  uint32_t *rm_field = (uint32_t *)rm; \
+  if( prefixes & PREFIX_OPERAND_SIZE_OVERRIDE ){ \
+  perform_16bit_ ## cmd( *((uint16_t *)&arg1 ), arg2, (uint16_t *)dest, &context->eflags ); \
+  context->code+= displacement + incr_operand_size_override; \
+  context->eip+= displacement + incr_operand_size_override; \
+  } else { \
+  perform_32bit_ ## cmd( *((uint32_t *)&arg1 ), arg2, (uint32_t *)dest, &context->eflags ); \
+  context->code+= displacement + incr_normal; \
+  context->eip+= displacement + incr_normal; \
+  } \
+  } \
+  HANDLER_DEF_END
+
 
 #define HANDLER_DEF_AL_IMM8( cmd ) HANDLER_DEF (cmd, 8, al, imm8, NULL, context->eax, context->code[1], &context->eax, 2 )
 #define HANDLER_DEF_AR1632_IMM1632( cmd ) HANDLER_WITH_PREFIX_DEF (cmd, ar1632, imm1632, NULL, context->eax, context->code[1], &context->eax, 5, 3)
@@ -215,7 +239,7 @@
 } \
 HANDLER_DEF_END
 
-#define HANDLER_WITH_PREFIX_DEF_JCC_REL( cmd, cond, displacement_normal, displacement_override, operand_position ) __declspec( naked ) int FASTCALL cmd ## _rel1632_handler( ThreadContext_t * const context , VirtualDirectoryLookupTable_t * const table) { \
+#define HANDLER_WITH_PREFIX_DEF_JCC_REL( cmd, cond, displacement_normal, displacement_override, operand_position ) HANDLER_JCC_WITH_PREFIX_REL_INTERFACE( cmd ) \
   HANDLER_DEF_PROLOG \
   { \
   uint32_t prefixes = get_prefixes( &context->code, &context->eip ); \
@@ -239,7 +263,7 @@ HANDLER_DEF_END
 #define HANDLER_DEF_JCC_REL1632_WITH_ESCAPE_SEQUENCE( cmd, cond ) HANDLER_WITH_PREFIX_DEF_JCC_REL( cmd, cond, 5, 3, 2 )
 #define HANDLER_DEF_JCC_REL32_WITH_ESCAPE_SEQUENCE(cmd, cond ) HANDLER_DEF_JCC_REL( cmd, cond, 32, 5, 2)
 
-#define HANDLER_DEF_SETCC_RM8( cmd, cond ) __declspec( naked ) int FASTCALL cmd ## _rm8_handler( ThreadContext_t * const context , VirtualDirectoryLookupTable_t * const table) { \
+#define HANDLER_DEF_SETCC_RM8( cmd, cond ) HANDLER_SETCC_RM8_INTERFACE( cmd ) \
   HANDLER_DEF_PROLOG \
   { \
   uint32_t displacement = 0; \
