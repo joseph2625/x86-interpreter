@@ -51,7 +51,7 @@ typedef struct Image {
 
 } Image_t;
 struct InterpreterOptions;
-bool load_image( InterpreterOptions *options, Image_t *image );
+bool load_image( struct InterpreterOptions *options, Image_t *image );
 bool process_image( ExecutableType_t type_detection_override, Image_t *image, uint32_t base_address, uint32_t entry_point );
 void *get_raw_image_at_offset( Image_t *image, uint32_t offset, size_t size );
 bool open_and_read_file_from_disk( char *file_path, void **file_buffer, size_t *file_size );

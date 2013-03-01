@@ -28,7 +28,13 @@
   __asm mov table, edx \
   }
 
-#define HANDLER_DEF_END { dump_thread_context( context, table );} __asm { \
+#ifdef _DEBUG
+#define DUMP_THREAD_CONTEXT dump_thread_context( context, table );
+#else
+#define DUMP_THREAD_CONTEXT
+#endif
+
+#define HANDLER_DEF_END { DUMP_THREAD_CONTEXT } __asm { \
   __asm lea eax, opcode_dispatch_table \
   __asm mov ecx, context \
   __asm mov edx, table \
@@ -46,6 +52,7 @@
   } \
 }
 
+#undef DUMP_THREAD_CONTEXT
 
 #define HANDLER_EXTOPCODE_DISPATCH( cmd, destname, srcname ) __declspec( naked ) int FASTCALL cmd ## _ ## destname ## _ ## srcname ## _handler( ThreadContext_t * const context , VirtualDirectoryLookupTable_t * const table) { __asm { \
   __asm push ebx \
@@ -92,7 +99,11 @@
 #define FORCEINLINE __attribute__((always_inline))
 #define HANDLER_DECL(name) &&name
 #define HANDLER_DEF_BEGIN(name) name:
-#define HANDLER_DEF_END /*dump_thread_context(context, table);*/ goto *opcode_dispatch_table[context->code[0]];
+#ifdef _DEBUG
+#define HANDLER_DEF_END dump_thread_context( context, table ); goto *opcode_dispatch_table[context->code[0]];
+#else
+#define HANDLER_DEF_END goto *opcode_dispatch_table[context->code[0]];
+#endif
 #define HANDLER_INTERFACE( cmd, destname, srcname ) cmd ## _ ## destname ## _ ## srcname ## _handler:
 #define HANDLER_JCC_REL_INTERFACE( cmd, bit ) cmd ## _rel ## bit ## _handler:
 #define HANDLER_JCC_WITH_PREFIX_REL_INTERFACE( cmd ) cmd ## _rel1632_handler:

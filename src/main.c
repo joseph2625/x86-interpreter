@@ -15,6 +15,11 @@ int main( int argc, char *argv[] ) {
   Image_t image = { 0 };
   InterpreterOptions_t options = { 0 };
 
+  if( argc < 2 ) {
+    print_usage( argv[0] );
+    return -1;
+  }
+
   if( !parse_options( argc, argv, &options ) ) {
     print_usage(argv[0]);
     return 0;
@@ -46,7 +51,6 @@ int main( int argc, char *argv[] ) {
       break;
   }
   log_message( INFO ,"All threads terminated. Exiting..." );
-  system("pause");
   return 0;
 on_error:
   cleanup( &image, &environment, &options, &notifier_sem, &wait_sem );

@@ -62,8 +62,8 @@ typedef struct RuntimeEnvironment {
   VirtualPageNode_t *page_list;
 
   unsigned int thread_count;
-  ThreadNode *threads;
-  InterpreterOptions *options;
+  struct ThreadNode *threads;
+  struct InterpreterOptions *options;
 
   uint32_t default_thread_entry_point;
   
@@ -144,7 +144,7 @@ typedef struct PthreadContext{
   sem_t *wait_sem;
 } PthreadContext_t;
 
-bool set_up_runtime_environment( InterpreterOptions *options, Image_t *image, RuntimeEnvironment_t *environment, pthread_mutex_t *mutex, sem_t *notifier_sem, sem_t *wait_sem );
+bool set_up_runtime_environment( struct InterpreterOptions *options, Image_t *image, RuntimeEnvironment_t *environment, pthread_mutex_t *mutex, sem_t *notifier_sem, sem_t *wait_sem );
 bool update_runtime_environment( RuntimeEnvironment_t *environment );
 bool create_thread( RuntimeEnvironment_t *environment, char * initial_thread_context_file_path, bool use_default_entry_point, uint32_t entry_point, uint32_t argument1, uint32_t argument2 ,uint32_t stack_size, pthread_mutex_t *mutex, sem_t *notifier_sem, sem_t *wait_sem );
 #endif //X86INTERPRETER_RUNTIME_H

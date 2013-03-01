@@ -23,4 +23,4 @@ typedef struct InterpreterOptions {
 bool parse_options( int argc, char *argv[], InterpreterOptions_t *options );
 void print_usage( char *name );
 
-#endif X86INTERPRETER_OPTIONS_H
+#endif //X86INTERPRETER_OPTIONS_H

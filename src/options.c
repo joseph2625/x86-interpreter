@@ -6,6 +6,7 @@
 #include "XGetopt.h"
 #else
 #include <getopt.h>
+#define _stricmp strcmp
 #endif
 
 static VerbosityLevel_t level_mapping[] = { SILENT, PRINT_ALL_ACCESS_VIOLATIONS, PRINT_AND_LOG_ALL_ACCESS_VIOLATIONS };
