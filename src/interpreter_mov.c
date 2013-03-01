@@ -91,7 +91,7 @@ HANDLER_DEF_END
 
     srcdest = (uint16_t *)get_rm( &context->code[1], context->general_purpose_registers, &displacement, table);
     if( GETREGNUM(context->code[1]) > 5 ){
-      fprintf( stderr, "ERROR: Invalid segment register\n" );
+      log_message( ERROR, "Invalid segment register" );
       assert(0);
     }
     if( context->code[0] == 0x8C )

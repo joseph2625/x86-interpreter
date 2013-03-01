@@ -2,6 +2,7 @@
 #define X86INTERPRETER_INTERPRETER_UTIL_H
 
 #include <stdlib.h>
+#include "diagnostics.h"
 
 #define PREFIX_LOCK (1 << 0)
 #define PREFIX_REPN (1 << 1)
@@ -198,7 +199,7 @@ inline static void print_access_violation( const uint32_t virtual_address, const
     break;
   }
 
-  fprintf( stderr, "ERROR: Access violation while %s [%08X]\n", access_string, virtual_address );
+  log_message(ERROR, "Access violation while %s [%08X]", access_string, virtual_address );
   assert(0);
 }
 
@@ -239,7 +240,7 @@ inline static uint32_t resolve_rm( const uint32_t *general_purpose_registers, co
       return_value = 0;
       break;
     default: //error check
-      fprintf( stderr, "ERROR: Illegal SIB index\n");
+      log_message( ERROR, "Illegal SIB index");
       assert(0);
       break;
     }
@@ -263,7 +264,7 @@ inline static uint32_t resolve_rm( const uint32_t *general_purpose_registers, co
         return_value += general_purpose_registers[REGISTER_INDEX_EBP];
         break;
       case 3:
-        fprintf( stderr, "ERROR: Illegal MOD value for SIBBASE 5\n");
+        log_message( ERROR, "Illegal MOD value for SIBBASE 5");
         assert(0);
         break;
       }
@@ -284,7 +285,7 @@ inline static uint32_t resolve_rm( const uint32_t *general_purpose_registers, co
     break;
   case 3:
   default:
-    fprintf( stderr, "ERROR: Illegal MOD value for displacements\n");
+    log_message( ERROR, "Illegal MOD value for displacements");
     break;
   }
 
@@ -393,8 +394,8 @@ inline static void dump_thread_context( ThreadContext_t *context, VirtualDirecto
     if( dest )
       printf( "%08X %08X\n", context->esp + i * 4, *dest );
   }
-  //printf( "Press any key to continue...\n" );
-  //getc(stdin);
+  printf( "Press any key to continue...\n" );
+  getc(stdin);
 
 }
 

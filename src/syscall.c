@@ -2,6 +2,10 @@
 #include <errno.h>
 #include <time.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 size_t handle_sys_write( VirtualDirectoryLookupTable_t *table, int fd, uint32_t buffer_address, size_t count ) {
   if(fd == 1) { //ONLY SUPPORTS STDOUT FOR NOW
     //TODO: IMPLEMENT PROPER BUFFER ACCESS CHECK

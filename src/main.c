@@ -2,36 +2,28 @@
 #include "image.h"
 #include "runtime.h"
 #include "string.h"
+#include "options.h"
 #include <stdlib.h>
+#include "diagnostics.h"
 
+void cleanup(Image_t *image, RuntimeEnvironment_t *environment, InterpreterOptions_t *options, sem_t * notifier_sem, sem_t *wait_sem ){
+  if( image->buffer != NULL )
+    free(image->buffer);
+}
 int main( int argc, char *argv[] ) {
 
   Image_t image = { 0 };
-  uint32_t verbosity_level = 2;
+  InterpreterOptions_t options = { 0 };
 
-  for( int i = 1; i < argc; i++ ) {
-
-    if( !strcmp( argv[i], "-v" ) ) {
-
-      if( argc == ++i )
-        goto err_no_level;
-
-      verbosity_level = atoi(argv[i]);
-
-      if( verbosity_level < 1 || verbosity_level > 2)
-        goto err_no_level;
-
-    } else {
-      image.name = argv[i];
-    }
-
+  if( !parse_options( argc, argv, &options ) ) {
+    print_usage(argv[0]);
+    return 0;
   }
 
-  if( image.name == NULL )
-    goto err_no_name;
+  initialize_diagnostics( options.log_file_path, options.verbosity_level );
 
-  if( !load_image( &image ) ) {
-    fprintf( stderr, "ERROR: Unable to load the specified executable image\n" );
+  if( !load_image( &options, &image ) ) {
+    log_message( ERROR, "Unable to load the specified executable image" );
     return 1;
   }
 
@@ -42,9 +34,9 @@ int main( int argc, char *argv[] ) {
   sem_init( &notifier_sem, 0, 0 );
   sem_init( &wait_sem, 0, 0 );
 
-  if( !set_up_runtime_environment( &image, &environment, &mutex, &notifier_sem, &wait_sem ) ) {
-    fprintf( stderr, "ERROR: Unable to set up the runtime environment\n" );
-    return 1;
+  if( !set_up_runtime_environment( &options, &image, &environment, &mutex, &notifier_sem, &wait_sem ) ) {
+    log_message( ERROR, "Unable to set up the runtime environment" );
+    goto on_error;
   }
 
   while( true ){
@@ -53,12 +45,10 @@ int main( int argc, char *argv[] ) {
     if( !update_runtime_environment( &environment ))
       break;
   }
-  fprintf( stderr, "INFO: All threads terminated. Exiting...\n" );
+  log_message( INFO ,"All threads terminated. Exiting..." );
+  system("pause");
   return 0;
-err_no_level:
-  fprintf( stderr, "ERROR: Missing/Invalid verbosity level\n" );
-  return 1;
-err_no_name:
-  fprintf( stderr, "ERROR: Executable name must be specified\n" );
-  return 1;
+on_error:
+  cleanup( &image, &environment, &options, &notifier_sem, &wait_sem );
+  return -1;
 }

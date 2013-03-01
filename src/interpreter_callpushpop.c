@@ -55,7 +55,7 @@ HANDLER_DEF_END
     dest_address += context->eip + displacement + 1;
     unsigned char *dest = get_real_address( dest_address, table, EXECUTE, false );
     if( dest == NULL ) {
-      fprintf( stderr, "ERROR: Invalid destination address for JMP rm1632\n");
+      log_message( ERROR, "Invalid destination address for JMP rm1632" );
       assert(0);
     }
 
@@ -97,7 +97,7 @@ HANDLER_DEF_END
       to_push = context->gs;
       break;
     default:
-      fprintf( stderr, "ERROR: Invalid opcode for PUSH fgs\n");
+      log_message( ERROR, "Invalid opcode for PUSH fgs" );
       assert(0);
       break;
     }
@@ -135,7 +135,7 @@ HANDLER_DEF_END
       to_push = context->es;
       break;
     default:
-      fprintf( stderr, "ERROR: Invalid opcode for PUSH r\n");
+      log_message( ERROR, "Invalid opcode for PUSH r");
       assert(0);
       break;
     }
@@ -174,7 +174,7 @@ HANDLER_DEF_BEGIN(push_r1632_handler) {
     to_push = context->es;
     break;
   default:
-    fprintf( stderr, "ERROR: Invalid opcode for PUSH r1632\n");
+    log_message( ERROR, "Invalid opcode for PUSH r1632");
     assert(0);
     break;
   }
@@ -210,7 +210,7 @@ HANDLER_DEF_BEGIN(pop_r32_handler) {
     GETREG(context,context->code[0]-0x58) = *stack;
     break;
   default:
-    fprintf( stderr, "ERROR: Invalid opcode for POP r\n");
+    log_message( ERROR, "Invalid opcode for POP r");
     assert(0);
     break;
   }
@@ -243,7 +243,7 @@ HANDLER_DEF_BEGIN(pop_r1632_handler) {
       GETREG(context,context->code[0]-0x58) = *stack;
     break;
   default:
-    fprintf( stderr, "ERROR: Invalid opcode for POP r\n");
+    log_message( ERROR, "Invalid opcode for POP r");
     assert(0);
     break;
   }
@@ -302,7 +302,7 @@ HANDLER_DEF_END
       }
       break;
     default:
-      fprintf( stderr, "ERROR: Undefined extended opcode for 0xFF (CALL rm1632,PUSH rm1632)\n");
+      log_message( ERROR, "Undefined extended opcode for 0xFF (CALL rm1632,PUSH rm1632)");
       assert(0);
       break;
     }
@@ -342,7 +342,7 @@ HANDLER_DEF_END
       }
       break;
     default:
-      fprintf( stderr, "ERROR: Undefined extended opcode for 0xFF (CALL rm32,PUSH rm32)\n");
+      log_message( ERROR , "Undefined extended opcode for 0xFF (CALL rm32,PUSH rm32)" );
       assert(0);
       break;
     }
@@ -375,7 +375,7 @@ HANDLER_DEF_BEGIN(pop_rm1632_handler) {
     }
     break;
   default:
-    fprintf( stderr, "ERROR: Undefined extended opcode for 0x8F (POP rm1632)\n");
+    log_message( ERROR, "Undefined extended opcode for 0x8F (POP rm1632)");
     assert(0);
     break;
   }
@@ -400,7 +400,7 @@ HANDLER_DEF_BEGIN(pop_rm32_handler) {
     }
     break;
   default:
-    fprintf( stderr, "ERROR: Undefined extended opcode for 0x8F (POP rm32)\n");
+    log_message( ERROR, "Undefined extended opcode for 0x8F (POP rm32)");
     assert(0);
     break;
   }

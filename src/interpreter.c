@@ -17,7 +17,7 @@ HANDLER_DEF_BEGIN(interrupt_handler) {
   case 0x80:
     switch(context->eax) {
     case 1:
-      fprintf( stdout, "INFO: sys_exit invoked with exit code %X (%d). Exiting...\n", context->ebx, context->ebx);
+      log_message( INFO, "sys_exit invoked with exit code %X (%d). Exiting...", context->ebx, context->ebx);
 #ifdef _WIN32
       __asm {
         mov ecx, context
@@ -44,12 +44,12 @@ HANDLER_DEF_BEGIN(interrupt_handler) {
       context->eax = handle_sys_clock_gettime( table, context->ebx, context->ecx );
       break;
     default:
-      fprintf( stderr, "ERROR: Invalid system call number\n");
+      log_message( INFO, "Invalid/Unsupported system call number %d", context->eax );
       break;
     }
     break;
   default:
-    fprintf( stderr, "ERROR: Invalid interrupt vector number\n");
+    log_message( ERROR, "ERROR: Invalid interrupt vector number %d", context->code[1] );
     assert(0);
   }
   context->eip+=2;
@@ -231,7 +231,7 @@ HANDLER_DEF_END
 
 
   HANDLER_DEF_BEGIN(undefined_opcode_handler) {
-    fprintf( stderr, "ERROR: Undefined opcode %02X at [%08X]\n", context->code[0], context->eip);
+    log_message( ERROR, "Undefined opcode %02X at [%08X]", context->code[0], context->eip);
 #ifndef _WIN32
     return -1;
 }

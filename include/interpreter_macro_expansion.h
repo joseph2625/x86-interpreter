@@ -28,7 +28,7 @@
   __asm mov table, edx \
   }
 
-#define HANDLER_DEF_END { /*dump_thread_context( context, table );*/} __asm { \
+#define HANDLER_DEF_END { dump_thread_context( context, table );} __asm { \
   __asm lea eax, opcode_dispatch_table \
   __asm mov ecx, context \
   __asm mov edx, table \

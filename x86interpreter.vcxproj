@@ -11,6 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="3p\src\XGetopt.c" />
+    <ClCompile Include="src\diagnostics.c" />
+    <ClCompile Include="src\elf.c" />
     <ClCompile Include="src\image.c" />
     <ClCompile Include="src\interpreter.c" />
     <ClCompile Include="src\interpreter_instructions.c" />
@@ -20,19 +23,25 @@
     <ClCompile Include="src\main.c" />
     <ClCompile Include="src\options.c" />
     <ClCompile Include="src\pe.c" />
+    <ClCompile Include="src\raw.c" />
     <ClCompile Include="src\runtime.c" />
     <ClCompile Include="src\syscall.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="3p\include\XGetopt.h" />
     <ClInclude Include="3p\include\pthread.h" />
     <ClInclude Include="3p\include\sched.h" />
     <ClInclude Include="3p\include\semaphore.h" />
+    <ClInclude Include="include\diagnostics.h" />
+    <ClInclude Include="include\elf.h" />
     <ClInclude Include="include\image.h" />
     <ClInclude Include="include\interpreter.h" />
     <ClInclude Include="include\interpreter_macro_expansion.h" />
     <ClInclude Include="include\interpreter_util.h" />
     <ClInclude Include="include\interpreter_util_instructions.h" />
+    <ClInclude Include="include\options.h" />
     <ClInclude Include="include\pe.h" />
+    <ClInclude Include="include\raw.h" />
     <ClInclude Include="include\runtime.h" />
     <ClInclude Include="include\syscall.h" />
   </ItemGroup>
@@ -75,9 +84,10 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)\include\;$(ProjectDir)\3p\include\</AdditionalIncludeDirectories>
       <PreprocessToFile>false</PreprocessToFile>
+      <CompileAs>CompileAsCpp</CompileAs>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

@@ -8,10 +8,15 @@
 
 #define UNSPECIFIED_BASE 0xFFFFFFFF
 #define UNSPECIFIED_SIZE 0xFFFFFFFF
+#define RESERVED_REGION_HIGH_START 0xC0000000
+#define RESERVED_REGION_HIGH_END 0xFFFFFFFF
+#define RESERVED_REGION_HIGH_SIZE ( RESERVED_REGION_HIGH_END - RESERVED_REGION_HIGH_START + 1 )
 
-typedef struct InterpreterOptions {
-  unsigned int verbose_level;
-} InterpreterOptions_t;
+#define RESERVED_REGION_LOW_START 0x0
+#define RESERVED_REGION_LOW_END 0xFFFF
+#define RESERVED_REGION_LOW_SIZE ( RESERVED_REGION_LOW_END - RESERVED_REGION_LOW_START + 1 )
+
+#define DEFAULT_JUMP_TRAMPOLINE_ADDRESS 0x10000
 
 typedef struct VirtualPageLookupTable {
   unsigned char *frames[1024];
@@ -32,8 +37,59 @@ typedef struct VirtualDirectoryLookupTable {
 #define REGISTER_INDEX_ESI 6
 #define REGISTER_INDEX_EDI 7
 
-typedef struct ThreadContext {
+typedef enum ThreadState {
+  EXITED,
+  RUNNING
+} ThreadState_t;
+
+#define READ 0x1
+#define WRITE 0x2
+#define EXECUTE 0x4
+
+typedef struct VirtualPageNode {
+  uint32_t begin;
+  size_t size;
+  unsigned char *buffer;
+
+  struct VirtualPageNode *next;
+} VirtualPageNode_t;
+
+struct ThreadNode;
+struct InterpreterOptions;
+
+typedef struct RuntimeEnvironment {
+  VirtualDirectoryLookupTable_t directory_table;
+  VirtualPageNode_t *page_list;
+
+  unsigned int thread_count;
+  ThreadNode *threads;
+  InterpreterOptions *options;
+
+  uint32_t default_thread_entry_point;
   
+  uint32_t virtual_argv_address;
+
+} RuntimeEnvironment_t;
+#ifdef _WIN32
+#pragma pack(push, 1)
+#endif
+
+typedef struct ThreadContextFile {
+  uint32_t general_purpose_registers[8];
+  uint16_t segment_registers[6];
+  uint32_t eflags;
+} 
+#ifndef _WIN32
+__attribute__((packed))
+#endif
+ThreadContextFile_t;
+
+#ifdef _WIN32
+#pragma pack(pop)
+#endif
+
+typedef struct ThreadContext {
+
   union {
     uint16_t segment_registers[6];
     struct {
@@ -45,7 +101,7 @@ typedef struct ThreadContext {
       uint16_t gs;
     };
   };
-  
+
 
   union {
     uint8_t register_field[32];
@@ -62,18 +118,14 @@ typedef struct ThreadContext {
     };
   };
   uint32_t eip;
-  
+
   uint32_t eflags;
-  
+
 
   unsigned char *code;
 
+  RuntimeEnvironment_t *environment;
 } ThreadContext_t;
-
-typedef enum ThreadState {
-  EXITED,
-  RUNNING
-} ThreadState_t;
 
 typedef struct ThreadNode{
   ThreadContext_t context;
@@ -83,26 +135,6 @@ typedef struct ThreadNode{
   struct ThreadNode *next;
 } ThreadNode_t;
 
-#define READ 0x1
-#define WRITE 0x2
-#define EXECUTE 0x4
-
-typedef struct VirtualPageNode {
-  uint32_t begin;
-  size_t size;
-  unsigned char *buffer;
-
-  struct VirtualPageNode *next;
-} VirtualPageNode_t;
-
-typedef struct RuntimeEnvironment {
-  VirtualDirectoryLookupTable_t directory_table;
-  VirtualPageNode_t *page_list;
-
-  unsigned int thread_count;
-  ThreadNode_t *threads;
-
-} RuntimeEnvironment_t;
 
 typedef struct PthreadContext{
   ThreadNode_t *thread_node;
@@ -112,7 +144,7 @@ typedef struct PthreadContext{
   sem_t *wait_sem;
 } PthreadContext_t;
 
-bool set_up_runtime_environment( Image_t *image, RuntimeEnvironment_t *environment, pthread_mutex_t *mutex, sem_t *notifier_sem, sem_t *wait_sem );
-bool create_thread( RuntimeEnvironment_t *environment, uint32_t entry_point, uint32_t stack_size, pthread_mutex_t *mutex, sem_t *notifier_sem, sem_t *wait_sem );
+bool set_up_runtime_environment( InterpreterOptions *options, Image_t *image, RuntimeEnvironment_t *environment, pthread_mutex_t *mutex, sem_t *notifier_sem, sem_t *wait_sem );
 bool update_runtime_environment( RuntimeEnvironment_t *environment );
+bool create_thread( RuntimeEnvironment_t *environment, char * initial_thread_context_file_path, bool use_default_entry_point, uint32_t entry_point, uint32_t argument1, uint32_t argument2 ,uint32_t stack_size, pthread_mutex_t *mutex, sem_t *notifier_sem, sem_t *wait_sem );
 #endif //X86INTERPRETER_RUNTIME_H

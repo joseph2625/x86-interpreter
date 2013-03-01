@@ -9,7 +9,7 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Source Files\3p">
+    <Filter Include="3p">
       <UniqueIdentifier>{92f68846-225b-4378-bc0c-03dd2372f908}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -47,6 +47,18 @@
     <ClCompile Include="src\syscall.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\elf.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="3p\src\XGetopt.c">
+      <Filter>3p</Filter>
+    </ClCompile>
+    <ClCompile Include="src\diagnostics.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\raw.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\image.h">
@@ -62,13 +74,13 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="3p\include\pthread.h">
-      <Filter>Source Files\3p</Filter>
+      <Filter>3p</Filter>
     </ClInclude>
     <ClInclude Include="3p\include\sched.h">
-      <Filter>Source Files\3p</Filter>
+      <Filter>3p</Filter>
     </ClInclude>
     <ClInclude Include="3p\include\semaphore.h">
-      <Filter>Source Files\3p</Filter>
+      <Filter>3p</Filter>
     </ClInclude>
     <ClInclude Include="include\interpreter_util.h">
       <Filter>Header Files</Filter>
@@ -80,6 +92,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\syscall.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\elf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="3p\include\XGetopt.h">
+      <Filter>3p</Filter>
+    </ClInclude>
+    <ClInclude Include="include\options.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\diagnostics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\raw.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
