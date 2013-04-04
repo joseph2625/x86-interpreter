@@ -3,7 +3,7 @@
 #include <assert.h>
 #include "syscall.h"
 
-#ifndef _WIN32
+#ifndef _MSC_VER
 #include "interpreter_opcode_dispatch_table.c"
 #endif
 HANDLER_DEF_BEGIN(nop_handler) {
@@ -18,7 +18,7 @@ HANDLER_DEF_BEGIN(interrupt_handler) {
     switch(context->eax) {
     case 1:
       log_message( INFO, "sys_exit invoked with exit code %X (%d). Exiting...", context->ebx, context->ebx);
-#ifdef _WIN32
+#ifdef _MSC_VER
       __asm {
         mov ecx, context
         lea ecx, [ecx]context.ebx
@@ -139,7 +139,7 @@ HANDLER_DEF_END
 
 
 HANDLER_DEF_BEGIN(prefix_handler)
-#ifdef _WIN32
+#ifdef _MSC_VER
 __asm{
 lea eax, opcode_with_prefix_dispatch_table
 xor esi, esi
@@ -173,7 +173,7 @@ jmp eax
 HANDLER_DEF_END
 
   HANDLER_DEF_BEGIN(prefix_with_escape_sequence_handler)
-#ifdef _WIN32
+#ifdef _MSC_VER
   __asm{
     lea eax, opcode_with_prefix_and_escape_sequence_dispatch_table
       xor esi, esi
@@ -207,7 +207,7 @@ goto *opcode_with_prefix_and_escape_sequence_dispatch_table[context->code[i]];
 HANDLER_DEF_END
 
   HANDLER_DEF_BEGIN(escape_sequence_handler) //NO PREFIX
-#ifdef _WIN32
+#ifdef _MSC_VER
   __asm{
     lea eax, opcode_with_escape_sequence_dispatch_table
       mov ecx, context
@@ -232,7 +232,7 @@ HANDLER_DEF_END
 
   HANDLER_DEF_BEGIN(undefined_opcode_handler) {
     log_message( ERROR, "Undefined opcode %02X at [%08X]", context->code[0], context->eip);
-#ifndef _WIN32
+#ifndef _MSC_VER
     return -1;
 }
 #else
@@ -249,7 +249,7 @@ __asm {
 }
 #endif
 
-#ifndef _WIN32
+#ifndef _MSC_VER
 #include "interpreter_instructions.c"
 #include "interpreter_callpushpop.c"
 #include "interpreter_mov.c"

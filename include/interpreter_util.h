@@ -3,6 +3,9 @@
 
 #include <stdlib.h>
 #include "diagnostics.h"
+#ifdef _MSC_VER
+void clear_stdout();
+#endif
 
 #define PREFIX_LOCK (1 << 0)
 #define PREFIX_REPN (1 << 1)
@@ -357,9 +360,10 @@ inline static uint8_t *get_rm8( unsigned char *modrm_pointer, uint32_t *const re
 
   return dest;
 }
+
 inline static void dump_thread_context( ThreadContext_t *context, VirtualDirectoryLookupTable_t *table ){
-#ifdef _WIN32
-  system("cls");
+#ifdef _MSC_VER //as per Microsoft KB 99261 (http://support.microsoft.com/kb/99261)
+  clear_stdout();
 #else
   printf("\033[2J\033[1;1H");
 #endif

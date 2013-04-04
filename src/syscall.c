@@ -2,7 +2,7 @@
 #include <errno.h>
 #include <time.h>
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #include <windows.h>
 #endif
 
@@ -44,7 +44,7 @@ int handle_sys_clock_gettime( VirtualDirectoryLookupTable_t *table, uint32_t clk
   if( clkid == CLOCK_MONOTONIC ) {
     struct timespec *timespec = (struct timespec *)get_real_address(timespec_address, table, READ, true);
     if( timespec ) {
-#ifdef _WIN32
+#ifdef _MSC_VER
       //timespec->tv_sec = GetTickCount();
       
       LARGE_INTEGER count;

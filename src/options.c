@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #include "XGetopt.h"
 #else
 #include <getopt.h>
@@ -100,25 +100,25 @@ void print_usage(char *name){
     "\t\t\t\t\t   to stderr and into a file. The file\n"
     "\t\t\t\t\t   path must be provided via -f flag.\n\n"
     "\t\t\tThe default value is 1.\n\n"
-    "\t-f [logfile]\tLogs all message into [logfile]. -v 2 must be specified\n\n"
-    "\t-t [filetype]\tOverrides automatic executable file type detection.\n"
-    "\t\t\t[filetype] can be one of the following:\n\n"
+    "\t-f logfile  \tLogs all message into [logfile]. -v 2 must be specified\n\n"
+    "\t-t filetype  \tOverrides automatic executable file type detection.\n"
+    "\t\t\tfiletype can be one of the following:\n\n"
     "\t\t\tpe : Portable Executable (x86)\n"
     "\t\t\telf: Executable and Linkable Format (x86)\n"
     "\t\t\traw: Raw binary blob\n"
     "\t\t\ttxt: Binary encoded in hexadecimal string\n\n"
-    "\t-c [contextfile]Path to thread context file that contains the initial\n"
+    "\t-c contextfile  Path to thread context file that contains the initial\n"
     "\t\t\tthread context (optional). This file is consulted only\n"
     "\t\t\tif the executable file is a binary blob or a binary\n"
     "\t\t\tencoded in hexadecimal string. The intial stack for\n"
     "\t\t\tthe executable will be positioned according to the \n"
     "\t\t\tvalue of esp register, modulo the page size (4KB)\n\n"
-    "\t-b [base]\tBase address at which the program will be loaded\n"
+    "\t-b base  \tBase address at which the program will be loaded\n"
     "\t\t\t(optional). This value is used only if the\n"
     "\t\t\texecutable file is a binary blob or a binary\n"
     "\t\t\tencoded in hexadecimal string. The default value is\n"
     "\t\t\t0x400000\n\n"
-    "\t-e [entrypoint] Initial entry point that will be executed (optional)\n"
+    "\t-e entrypoint   Initial entry point that will be executed (optional)\n"
     "\t\t\tThis value is used only if the executable file is a\n"
     "\t\t\tbinary blob or a binary encoded in hexadecimal\n"
     "\t\t\tstring. The default value is 0x400000\n\n"

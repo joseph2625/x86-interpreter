@@ -9,7 +9,7 @@
 
 int interpret( RuntimeEnvironment_t *const environment, ThreadNode_t *const thread );
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 extern int (FASTCALL * opcode_dispatch_table[256]) (ThreadContext_t *, VirtualDirectoryLookupTable_t *);
 extern int (FASTCALL * opcode_with_prefix_dispatch_table[256]) (ThreadContext_t *, VirtualDirectoryLookupTable_t *);
 extern int (FASTCALL * opcode_with_escape_sequence_dispatch_table[256]) (ThreadContext_t *, VirtualDirectoryLookupTable_t *);

@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="3p\src\XGetopt.c" />
+    <ClCompile Include="src\cls.c" />
     <ClCompile Include="src\diagnostics.c" />
     <ClCompile Include="src\elf.c" />
     <ClCompile Include="src\image.c" />

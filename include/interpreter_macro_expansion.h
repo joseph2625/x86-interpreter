@@ -1,7 +1,7 @@
 #ifndef X86INTERPRETER_INTERPRETER_MACRO_EXPANSION_H
 #define X86INTERPRETER_INTERPRETER_MACRO_EXPANSION_H
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #define FORCEINLINE __forceinline
 #define FASTCALL __fastcall
 #define HANDLER_DECL(name) name
@@ -29,12 +29,8 @@
   }
 
 #ifdef _DEBUG
-#define DUMP_THREAD_CONTEXT dump_thread_context( context, table );
-#else
-#define DUMP_THREAD_CONTEXT
-#endif
 
-#define HANDLER_DEF_END { DUMP_THREAD_CONTEXT } __asm { \
+#define HANDLER_DEF_END { dump_thread_context( context, table ); } __asm { \
   __asm lea eax, opcode_dispatch_table \
   __asm mov ecx, context \
   __asm mov edx, table \
@@ -52,8 +48,27 @@
   } \
 }
 
-#undef DUMP_THREAD_CONTEXT
+#else
 
+#define HANDLER_DEF_END __asm { \
+  __asm lea eax, opcode_dispatch_table \
+  __asm mov ecx, context \
+  __asm mov edx, table \
+  __asm lea ebx, [ecx]context.code \
+  __asm mov ebx, [ebx] \
+  __asm movzx ebx, byte ptr[ebx] \
+  __asm lea eax, [eax+ebx*4] \
+  __asm mov eax, [eax] \
+  __asm mov esp, ebp \
+  __asm pop edi \
+  __asm pop esi \
+  __asm pop ebx\
+  __asm pop ebp \
+  __asm jmp eax \
+  } \
+}
+
+#endif
 #define HANDLER_EXTOPCODE_DISPATCH( cmd, destname, srcname ) __declspec( naked ) int FASTCALL cmd ## _ ## destname ## _ ## srcname ## _handler( ThreadContext_t * const context , VirtualDirectoryLookupTable_t * const table) { __asm { \
   __asm push ebx \
   __asm lea eax, cmd ## _ ## destname ## _ ## srcname ## _dispatch_table  \

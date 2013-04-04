@@ -1,6 +1,6 @@
 #include "interpreter.h"
 
-#ifndef _WIN32
+#ifndef _MSC_VER
 #define DISPATCH_TABLE_DECL(name, size) static void *name[size] = 
 int FASTCALL dispatch( ThreadContext_t *const context, VirtualDirectoryLookupTable_t *const table ){
 #else
@@ -507,7 +507,7 @@ DISPATCH_TABLE_DECL(opcode_dispatch_table, 256)
   HANDLER_DECL(callpushdecincjmp_rm32__handler), //0xFF
 };
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 int (FASTCALL * opcode_with_prefix_dispatch_table[256]) (ThreadContext_t *, VirtualDirectoryLookupTable_t *) = 
 #else
 static void *opcode_with_prefix_dispatch_table[256] = 
@@ -773,7 +773,7 @@ static void *opcode_with_prefix_dispatch_table[256] =
 };
 
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 int (FASTCALL * opcode_with_escape_sequence_dispatch_table[256]) (ThreadContext_t *, VirtualDirectoryLookupTable_t *) = 
 #else
 static void *opcode_with_escape_sequence_dispatch_table[256] = 
@@ -1038,7 +1038,7 @@ static void *opcode_with_escape_sequence_dispatch_table[256] =
     HANDLER_DECL(undefined_opcode_handler), //0xFF
 };
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 int (FASTCALL * opcode_with_prefix_and_escape_sequence_dispatch_table[256]) (ThreadContext_t *, VirtualDirectoryLookupTable_t *) = 
 #else
 static void *opcode_with_prefix_and_escape_sequence_dispatch_table[256] = 
@@ -1303,6 +1303,6 @@ static void *opcode_with_prefix_and_escape_sequence_dispatch_table[256] =
     HANDLER_DECL(undefined_opcode_handler), //0xFF
 };
 
-#ifndef _WIN32
+#ifndef _MSC_VER
 goto *opcode_dispatch_table[context->code[0]];
 #endif

@@ -1,6 +1,6 @@
 #ifndef X86INTERPRETER_IMAGE_H
 #define X86INTERPRETER_IMAGE_H
-#ifndef _WIN32
+#ifndef _MSC_VER
 #include <stdbool.h>
 #endif
 #include <stdio.h>

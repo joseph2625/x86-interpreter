@@ -9,7 +9,7 @@
 
 bool open_and_read_file_from_disk( char *file_path, void **file_buffer, size_t *file_size )
 {
-#ifdef _WIN32 //fopen_s warning.
+#ifdef _MSC_VER //fopen_s warning.
   FILE *file;
   errno_t err = fopen_s( &file, file_path, "rb" );
   if( err != 0 ) {
@@ -87,18 +87,16 @@ bool process_image( ExecutableType_t type_detection_override, Image_t *image, ui
     return process_pe( image );
   else if( type_detection_override == ELF )
     return process_elf( image );
-  else
-    return process_raw( image, base_address, entry_point );
-
-  if( image->buffer[0] == 0x4D && image->buffer[1] == 0x5A ) {
-    image->executable_type = PE;
-    return process_pe( image );
-  } else if( image->buffer[0] == 0x7F && image->buffer[1] == 0x45 && image->buffer[2] ==  0x4C && image->buffer[3] == 0x46 ) {
-    image->executable_type = ELF;
-    return process_elf( image );
-  } else {
-    image->executable_type = RAW;
-    return process_raw( image, base_address, entry_point );
+  else {
+    if( image->buffer[0] == 0x4D && image->buffer[1] == 0x5A ) {
+      image->executable_type = PE;
+      return process_pe( image );
+    } else if( image->buffer[0] == 0x7F && image->buffer[1] == 0x45 && image->buffer[2] ==  0x4C && image->buffer[3] == 0x46 ) {
+      image->executable_type = ELF;
+      return process_elf( image );
+    } else {
+      image->executable_type = RAW;
+      return process_raw( image, base_address, entry_point );
+    }
   }
-  return false;
 }

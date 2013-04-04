@@ -70,7 +70,7 @@ typedef struct RuntimeEnvironment {
   uint32_t virtual_argv_address;
 
 } RuntimeEnvironment_t;
-#ifdef _WIN32
+#ifdef _MSC_VER
 #pragma pack(push, 1)
 #endif
 
@@ -79,12 +79,12 @@ typedef struct ThreadContextFile {
   uint16_t segment_registers[6];
   uint32_t eflags;
 } 
-#ifndef _WIN32
+#ifndef _MSC_VER
 __attribute__((packed))
 #endif
 ThreadContextFile_t;
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #pragma pack(pop)
 #endif
 

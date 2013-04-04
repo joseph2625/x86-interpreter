@@ -28,7 +28,7 @@ void initialize_diagnostics( const char *log_file_path, VerbosityLevel_t verbosi
   }
 
   if( log_file_path ) {
-#ifdef _WIN32
+#ifdef _MSC_VER
     errno_t err = fopen_s( &g_log_file, log_file_path, "w" );
     if( err != 0 ) {
 #else
@@ -54,7 +54,7 @@ void log_message( MessageLevel_t level, char *fmt, ... ) {
   va_list argptr;
 
   va_start( argptr, fmt );
-#ifdef _WIN32
+#ifdef _MSC_VER
   size_t length_required = _vscprintf( fmt, argptr );
 #else
   size_t length_required = vsnprintf( NULL, 0, fmt, argptr );
@@ -62,7 +62,7 @@ void log_message( MessageLevel_t level, char *fmt, ... ) {
 
   char  *buffer = (char *)malloc( length_required + 1 );
 
-#ifdef _WIN32
+#ifdef _MSC_VER
   _vsnprintf_s( buffer, length_required + 1, _TRUNCATE, fmt, argptr );
 #else
   vsnprintf( buffer, length_required + 1, fmt, argptr );

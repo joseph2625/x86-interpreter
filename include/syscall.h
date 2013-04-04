@@ -1,7 +1,7 @@
 #ifndef X86INTERPRETER_SYSCALL_H
 #define X86INTERPRETER_SYSCALL_H
 #include "interpreter.h"
-#ifdef _WIN32
+#ifdef _MSC_VER
 typedef struct{
   time_t   tv_sec;        /* seconds */
   long     tv_nsec;       /* nanoseconds */
