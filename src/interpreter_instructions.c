@@ -212,6 +212,10 @@ HANDLER_DEF_RM32_IMM8( shr );
 
 HANDLER_EXTOPCODE_DISPATCH( salshlsarshr, rm32, imm8 );
 
+HANDLER_DEF_JCC_REL8( jmp, true );
+HANDLER_WITH_PREFIX_DEF_JCC_REL( jmp, true, 5, 3, 1 );
+HANDLER_DEF_JCC_REL( jmp, true, 32, 5, 1);
+
 HANDLER_DEF_JCC_REL8( ja, !ISSETCF(context->eflags) && !ISSETZF(context->eflags) );
 HANDLER_DEF_JCC_REL8( jae, !ISSETCF(context->eflags) );
 HANDLER_DEF_JCC_REL8( jb, ISSETCF(context->eflags) );
@@ -228,7 +232,6 @@ HANDLER_DEF_JCC_REL8( jns, !ISSETSF(context->eflags) );
 HANDLER_DEF_JCC_REL8( jo, ISSETOF(context->eflags) );
 HANDLER_DEF_JCC_REL8( jp, ISSETPF(context->eflags) );
 HANDLER_DEF_JCC_REL8( js, ISSETSF(context->eflags) );
-HANDLER_DEF_JCC_REL8( jmp, true );
 
 HANDLER_DEF_JCC_REL1632_WITH_ESCAPE_SEQUENCE( ja, !ISSETCF(context->eflags) && !ISSETZF(context->eflags) );
 HANDLER_DEF_JCC_REL1632_WITH_ESCAPE_SEQUENCE( jae, !ISSETCF(context->eflags) );
@@ -246,7 +249,6 @@ HANDLER_DEF_JCC_REL1632_WITH_ESCAPE_SEQUENCE( jns, !ISSETSF(context->eflags) );
 HANDLER_DEF_JCC_REL1632_WITH_ESCAPE_SEQUENCE( jo, ISSETOF(context->eflags) );
 HANDLER_DEF_JCC_REL1632_WITH_ESCAPE_SEQUENCE( jp, ISSETPF(context->eflags) );
 HANDLER_DEF_JCC_REL1632_WITH_ESCAPE_SEQUENCE( js, ISSETSF(context->eflags) );
-HANDLER_DEF_JCC_REL1632_WITH_ESCAPE_SEQUENCE( jmp, true );
 
 HANDLER_DEF_JCC_REL32_WITH_ESCAPE_SEQUENCE( ja, !ISSETCF(context->eflags) && !ISSETZF(context->eflags) );
 HANDLER_DEF_JCC_REL32_WITH_ESCAPE_SEQUENCE( jae, !ISSETCF(context->eflags) );
@@ -264,7 +266,6 @@ HANDLER_DEF_JCC_REL32_WITH_ESCAPE_SEQUENCE( jns, !ISSETSF(context->eflags) );
 HANDLER_DEF_JCC_REL32_WITH_ESCAPE_SEQUENCE( jo, ISSETOF(context->eflags) );
 HANDLER_DEF_JCC_REL32_WITH_ESCAPE_SEQUENCE( jp, ISSETPF(context->eflags) );
 HANDLER_DEF_JCC_REL32_WITH_ESCAPE_SEQUENCE( js, ISSETSF(context->eflags) );
-HANDLER_DEF_JCC_REL32_WITH_ESCAPE_SEQUENCE( jmp, true );
 
 HANDLER_DEF_SETCC_RM8( seta, !ISSETCF(context->eflags) && !ISSETZF(context->eflags) );
 HANDLER_DEF_SETCC_RM8( setae, !ISSETCF(context->eflags) );
