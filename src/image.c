@@ -31,12 +31,12 @@ bool open_and_read_file_from_disk( char *file_path, void **file_buffer, size_t *
     
     if( bytes_read < current_buffer_size - current_file_size ) {
 
-      fclose( file );
-
       if( ferror( file ) ) {
+        fclose( file );
         free( buffer );
         return false;
       } else { //eof
+        fclose( file );
         *file_size = current_file_size + bytes_read;
         *file_buffer = buffer;
         return true;
