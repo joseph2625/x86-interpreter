@@ -150,6 +150,17 @@
 } \
   HANDLER_DEF_END
 
+#define HANDLER_TWO_DEST_OPS_DEF( cmd, bit, destname, srcname, rm, arg1, arg2, dest1, dest2, incr )  HANDLER_INTERFACE( cmd, destname, srcname ) \
+  HANDLER_DEF_PROLOG \
+  { \
+  uint32_t displacement = 0; \
+  uint32_t *rm_field = (uint32_t *)rm; \
+  perform_ ## bit ## bit_ ## cmd( *((uint ## bit ## _t *)&arg1 ), *((uint ## bit ## _t *)&arg2 ), (uint ## bit ## _t *)dest1, (uint ## bit ## _t *)dest2, &context->eflags ); \
+  context->code+= incr + displacement; \
+  context->eip+= incr + displacement; \
+} \
+  HANDLER_DEF_END
+
 // exception for sign-extended operand
 #define HANDLER_SIGN_EXT_DEF( cmd, bit, destname, srcname, rm, arg1, arg2, dest, incr ) HANDLER_INTERFACE(cmd, destname, srcname) \
   HANDLER_DEF_PROLOG \
@@ -180,6 +191,25 @@
   } \
   } \
   HANDLER_DEF_END
+
+#define HANDLER_TWO_DEST_OPS_WITH_PREFIX_DEF( cmd, destname, srcname, rm, arg1, arg2, dest1, dest2, incr_normal, incr_operand_size_override ) HANDLER_INTERFACE( cmd, destname, srcname ) \
+  HANDLER_DEF_PROLOG \
+  { \
+  uint32_t displacement = 0; \
+  uint32_t prefixes = get_prefixes( &context->code, &context->eip ); \
+  uint32_t *rm_field = (uint32_t *)rm; \
+  if( prefixes & PREFIX_OPERAND_SIZE_OVERRIDE ){ \
+  perform_16bit_ ## cmd( *((uint16_t *)&arg1 ), *((uint16_t *)&arg2), (uint16_t *)dest1, (uint16_t *)dest2, &context->eflags ); \
+  context->code+= displacement + incr_operand_size_override; \
+  context->eip+= displacement + incr_operand_size_override; \
+  } else { \
+  perform_32bit_ ## cmd( *((uint32_t *)&arg1 ), *((uint32_t *)&arg2 ), (uint32_t *)dest1, (uint32_t *)dest2, &context->eflags ); \
+  context->code+= displacement + incr_normal; \
+  context->eip+= displacement + incr_normal; \
+  } \
+  } \
+  HANDLER_DEF_END
+
 // exception for sign-extended operand
 #define HANDLER_WITH_PREFIX_SIGN_EXT_DEF( cmd, destname, srcname, rm, arg1, arg2, dest, incr_normal, incr_operand_size_override ) HANDLER_INTERFACE( cmd, destname, srcname ) \
   HANDLER_DEF_PROLOG \
@@ -231,9 +261,22 @@
 #define HANDLER_DEF_R32_RM8_WITH_ESCAPE_SEQUENCE( cmd ) HANDLER_DEF( cmd, 32, r32, rm8, get_rm8( &context->code[2], context->general_purpose_registers, &displacement, table), GETREG(context, GETREGNUM(context->code[2])), *rm_field, &GETREG(context, GETREGNUM(context->code[2])), 2)
 #define HANDLER_DEF_R32_RM16_WITH_ESCAPE_SEQUENCE( cmd ) HANDLER_SIGN_EXT_DEF( cmd, 32, r32, rm16, get_rm( &context->code[2], context->general_purpose_registers, &displacement, table), GETREG(context, GETREGNUM(context->code[2])), *((uint16_t *)rm_field), &GETREG(context, GETREGNUM(context->code[2])), 2 )
 
+#define HANDLER_TWO_DEST_OPS_DEF_R32_RM32_WITH_ESCAPE_SEQUENCE( cmd, dest1_reg, dest2_reg ) HANDLER_TWO_DEST_OPS_DEF( cmd, 32, r32, rm32, get_rm( &context->code[2], context->general_purpose_registers, &displacement, table), GETREG(context, GETREGNUM(context->code[2])), *rm_field, dest1_reg, dest2_reg, 2 )
+#define HANDLER_TWO_DEST_OPS_DEF_R1632_RM1632_WITH_ESCAPE_SEQUENCE( cmd, dest1_reg, dest2_reg ) HANDLER_TWO_DEST_OPS_WITH_PREFIX_DEF( cmd, r1632, rm1632, get_rm( &context->code[2], context->general_purpose_registers, &displacement, table), GETREG(context, GETREGNUM(context->code[2])), *rm_field, dest1_reg, dest2_reg, 2, 2)
+
+#define HANDLER_TWO_DEST_OPS_DEF_R32_RM32_IMM8( cmd, dest1_reg, dest2_reg ) HANDLER_TWO_DEST_OPS_DEF( cmd, 32, r32, rm32_imm8, get_rm( &context->code[1], context->general_purpose_registers, &displacement, table), *rm_field, context->code[1+displacement], dest1_reg, dest2_reg, 2 )
+#define HANDLER_TWO_DEST_OPS_DEF_R1632_RM1632_IMM8( cmd, dest1_reg, dest2_reg ) HANDLER_TWO_DEST_OPS_WITH_PREFIX_DEF( cmd, r1632, rm1632_imm8, get_rm( &context->code[1], context->general_purpose_registers, &displacement, table), *rm_field, context->code[1+displacement], dest1_reg, dest2_reg, 2, 2)
+
+#define HANDLER_TWO_DEST_OPS_DEF_R32_RM32_IMM32( cmd, dest1_reg, dest2_reg ) HANDLER_TWO_DEST_OPS_DEF( cmd, 32, r32, rm32_imm32, get_rm( &context->code[1], context->general_purpose_registers, &displacement, table), *rm_field, context->code[1+displacement], dest1_reg, dest2_reg, 5 )
+#define HANDLER_TWO_DEST_OPS_DEF_R1632_RM1632_IMM1632( cmd, dest1_reg, dest2_reg ) HANDLER_TWO_DEST_OPS_WITH_PREFIX_DEF( cmd, r1632, rm1632_imm1632, get_rm( &context->code[1], context->general_purpose_registers, &displacement, table), *rm_field, context->code[1+displacement], dest1_reg, dest2_reg, 5, 3)
+
 #define HANDLER_DEF_RM8( cmd ) HANDLER_SIGN_EXT_DEF( cmd, 8, rm8, , get_rm8( &context->code[1], context->general_purpose_registers, &displacement, table), *rm_field, 0, rm_field, 1 )
 #define HANDLER_DEF_RM1632( cmd ) HANDLER_WITH_PREFIX_SIGN_EXT_DEF( cmd, rm1632, , get_rm( &context->code[1], context->general_purpose_registers, &displacement, table), *rm_field, 0, rm_field, 1, 1 )
 #define HANDLER_DEF_RM32( cmd ) HANDLER_SIGN_EXT_DEF( cmd, 32, rm32, , get_rm( &context->code[1], context->general_purpose_registers, &displacement, table), *rm_field, 0, rm_field, 1 )
+
+#define HANDLER_TWO_DEST_OPS_DEF_RM8_AX( cmd, dest1_reg, dest2_reg ) HANDLER_TWO_DEST_OPS_DEF( cmd, 8, rm8, , get_rm8( &context->code[1], context->general_purpose_registers, &displacement, table), *rm_field, context->eax, dest1_reg, dest2_reg, 1 )
+#define HANDLER_TWO_DEST_OPS_DEF_RM1632_EAX( cmd, dest1_reg, dest2_reg ) HANDLER_TWO_DEST_OPS_WITH_PREFIX_DEF( cmd, rm1632, , get_rm( &context->code[1], context->general_purpose_registers, &displacement, table), *rm_field, context->eax, dest1_reg, dest2_reg, 1, 1 )
+#define HANDLER_TWO_DEST_OPS_DEF_RM32_EAX( cmd, dest1_reg, dest2_reg ) HANDLER_TWO_DEST_OPS_DEF( cmd, 32, rm32, , get_rm( &context->code[1], context->general_purpose_registers, &displacement, table), *rm_field, context->eax, dest1_reg, dest2_reg, 1 )
 
 #define HANDLER_DEF_R1632( cmd, base_opcode ) HANDLER_WITH_PREFIX_SIGN_EXT_DEF( cmd, r1632, , NULL, GETREG(context, context->code[0] - base_opcode), 0, &GETREG(context, context->code[0] - base_opcode), 1, 1 )
 #define HANDLER_DEF_R32( cmd, base_opcode ) HANDLER_SIGN_EXT_DEF( cmd, 32, r32, , NULL, GETREG(context, context->code[0] - base_opcode), 0, &GETREG(context, context->code[0] - base_opcode), 1 )

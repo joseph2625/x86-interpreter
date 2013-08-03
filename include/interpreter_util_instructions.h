@@ -399,6 +399,120 @@ inline static uint8_t perform_8bit_dec( const uint32_t i, const uint32_t dummy, 
   return k;
 }
 
+inline static uint64_t perform_32bit_mul( const uint32_t i, const uint32_t j, uint32_t *dest1, uint32_t *dest2, uint32_t *const context_eflags ){
+  uint32_t eflags = *context_eflags;
+  uint64_t k = (uint64_t)i * (uint64_t)j;
+
+  *dest1 = (uint32_t)k;
+  *dest2 = k >> 32;
+
+  if( *dest2 == 0 ){
+    UNSETCF(eflags);
+    UNSETOF(eflags);
+  } else {
+    SETCF(eflags);
+    SETOF(eflags);
+  }
+
+  *context_eflags = eflags;
+  return k;
+}
+
+inline static uint32_t perform_16bit_mul( const uint16_t i, const uint16_t j, uint16_t *dest1, uint16_t *dest2, uint32_t *const context_eflags ){
+  uint32_t eflags = *context_eflags;
+  uint32_t k = (uint16_t)i * (uint16_t)j;
+
+  *dest1 = (uint16_t)k;
+  *dest2 = k >> 16;
+
+  if( *dest2 == 0 ){
+    UNSETCF(eflags);
+    UNSETOF(eflags);
+  } else {
+    SETCF(eflags);
+    SETOF(eflags);
+  }
+
+  *context_eflags = eflags;
+  return k;
+}
+
+inline static uint16_t perform_8bit_mul( const uint8_t i, const uint8_t j, uint8_t * dest1, uint8_t *dest2, uint32_t *const context_eflags ){
+  uint32_t eflags = *context_eflags;
+  uint16_t k = (uint16_t)i * (uint16_t)j;
+
+  *dest1 = (uint8_t)k;
+  *dest2 = k >> 8;
+
+  if( *dest2 == 0 ){
+    UNSETCF(eflags);
+    UNSETOF(eflags);
+  } else {
+    SETCF(eflags);
+    SETOF(eflags);
+  }
+
+  *context_eflags = eflags;
+  return k;
+}
+
+inline static uint64_t perform_32bit_imul( const uint32_t i, const uint32_t j, uint32_t *dest1, uint32_t *dest2, uint32_t *const context_eflags ){
+  uint32_t eflags = *context_eflags;
+  int64_t k = (int64_t)((int32_t)i) * (int64_t)((int32_t)j);
+
+  *dest1 = (uint32_t)k;
+  *dest2 = k >> 32;
+
+  if( *dest2 == 0 || *dest2 == -1 ){
+    UNSETCF(eflags);
+    UNSETOF(eflags);
+  } else {
+    SETCF(eflags);
+    SETOF(eflags);
+  }
+
+  *context_eflags = eflags;
+  return k;
+}
+
+inline static uint32_t perform_16bit_imul( const uint16_t i, const uint16_t j, uint16_t *dest1, uint16_t *dest2, uint32_t *const context_eflags ){
+  uint32_t eflags = *context_eflags;
+  int32_t k = (int32_t)((int16_t)i) * (int32_t)((int16_t)j);
+
+  *dest1 = k;
+  *dest2 = k >> 16;
+
+  if( *dest2 == 0 || *dest2 == -1 ){
+    UNSETCF(eflags);
+    UNSETOF(eflags);
+  } else {
+    SETCF(eflags);
+    SETOF(eflags);
+  }
+
+  *context_eflags = eflags;
+  return k;
+}
+
+inline static uint16_t perform_8bit_imul( const uint8_t i, const uint8_t j, uint8_t * dest1, uint8_t *dest2, uint32_t *const context_eflags ){
+  uint32_t eflags = *context_eflags;
+  int16_t k = (int16_t)((int8_t)i) * (int16_t)((int8_t)j);
+
+  *dest1 = (int8_t)k;
+  *dest2 = k >> 8;
+
+  if( *dest2 == 0 || *dest2 == -1 ){
+    UNSETCF(eflags);
+    UNSETOF(eflags);
+  } else {
+    SETCF(eflags);
+    SETOF(eflags);
+  }
+
+  *context_eflags = eflags;
+  return k;
+}
+
 inline static uint32_t perform_32bit_inc( const uint32_t i, const uint32_t dummy, uint32_t * dest, uint32_t *const context_eflags ){
   uint32_t eflags = *context_eflags;
   uint32_t j = 1;

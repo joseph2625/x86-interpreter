@@ -2,6 +2,27 @@
 #include "interpreter.h"
 #endif
 
+HANDLER_TWO_DEST_OPS_DEF_RM8_AX( mul, &context->register_field[0], &context->register_field[1] );
+HANDLER_TWO_DEST_OPS_DEF_RM8_AX( imul, &context->register_field[0], &context->register_field[1] );
+
+HANDLER_TWO_DEST_OPS_DEF_RM1632_EAX( mul, &context->eax, &context->edx );
+HANDLER_TWO_DEST_OPS_DEF_RM1632_EAX( imul, &context->eax, &context->edx );
+
+HANDLER_TWO_DEST_OPS_DEF_RM32_EAX( mul, &context->eax, &context->edx );
+HANDLER_TWO_DEST_OPS_DEF_RM32_EAX( imul, &context->eax, &context->edx );
+
+HANDLER_TWO_DEST_OPS_DEF_R32_RM32_WITH_ESCAPE_SEQUENCE( mul, &GETREG(context, GETREGNUM(context->code[2])), &context->scratch_register );
+HANDLER_TWO_DEST_OPS_DEF_R32_RM32_WITH_ESCAPE_SEQUENCE( imul, &GETREG(context, GETREGNUM(context->code[2])), &context->scratch_register );
+
+HANDLER_TWO_DEST_OPS_DEF_R1632_RM1632_WITH_ESCAPE_SEQUENCE( mul, &GETREG(context, GETREGNUM(context->code[2])), &context->scratch_register );
+HANDLER_TWO_DEST_OPS_DEF_R1632_RM1632_WITH_ESCAPE_SEQUENCE( imul, &GETREG(context, GETREGNUM(context->code[2])), &context->scratch_register );
+
+HANDLER_TWO_DEST_OPS_DEF_R32_RM32_IMM8( imul, &GETREG(context, GETREGNUM(context->code[2])), &context->scratch_register );
+HANDLER_TWO_DEST_OPS_DEF_R1632_RM1632_IMM8( imul, &GETREG(context, GETREGNUM(context->code[2])), &context->scratch_register );
+
+HANDLER_TWO_DEST_OPS_DEF_R32_RM32_IMM32( imul, &GETREG(context, GETREGNUM(context->code[2])), &context->scratch_register );
+HANDLER_TWO_DEST_OPS_DEF_R1632_RM1632_IMM1632( imul, &GETREG(context, GETREGNUM(context->code[2])), &context->scratch_register );
+
 HANDLER_DEF_AR1632_IMM1632( add );
 HANDLER_DEF_AR1632_IMM1632( sub );
 HANDLER_DEF_AR1632_IMM1632( cmp );
@@ -35,7 +56,7 @@ HANDLER_DEF_RM8_IMM8( or );
 HANDLER_DEF_RM8_IMM8( test );
 
 HANDLER_EXTOPCODE_DISPATCH( addsubcmpandxoror, rm8, imm8 );
-HANDLER_EXTOPCODE_DISPATCH( testnotneg, rm8, optimm8 );
+HANDLER_EXTOPCODE_DISPATCH( testnotnegmulimul, rm8, optimm8 );
 
 HANDLER_DEF_RM1632_IMM1632( add );
 HANDLER_DEF_RM1632_IMM1632( sub );
@@ -46,7 +67,7 @@ HANDLER_DEF_RM1632_IMM1632( or );
 HANDLER_DEF_RM1632_IMM1632( test );
 
 HANDLER_EXTOPCODE_WITH_PREFIX_DISPATCH( addsubcmpandxoror, rm1632, imm1632, 0x81 );
-HANDLER_EXTOPCODE_WITH_PREFIX_DISPATCH( testnotneg, rm1632, optimm1632, 0xF7 );
+HANDLER_EXTOPCODE_WITH_PREFIX_DISPATCH( testnotnegmulimul, rm1632, optimm1632, 0xF7 );
 
 HANDLER_DEF_RM32_IMM32( add );
 HANDLER_DEF_RM32_IMM32( sub );
@@ -57,7 +78,7 @@ HANDLER_DEF_RM32_IMM32( or );
 HANDLER_DEF_RM32_IMM32( test );
 
 HANDLER_EXTOPCODE_DISPATCH( addsubcmpandxoror, rm32, imm32 );
-HANDLER_EXTOPCODE_DISPATCH( testnotneg, rm32, optimm32 );
+HANDLER_EXTOPCODE_DISPATCH( testnotnegmulimul, rm32, optimm32 );
 
 HANDLER_DEF_RM1632_IMM8( add );
 HANDLER_DEF_RM1632_IMM8( sub );

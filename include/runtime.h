@@ -121,6 +121,7 @@ typedef struct ThreadContext {
 
   uint32_t eflags;
 
+  uint32_t scratch_register;
 
   unsigned char *code;
 
